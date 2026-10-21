@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Marine Stat Lab · 자동 자료 로딩 (2-A)</title>
+<style>
+:root{--paper:#f5f4f0;--ink:#1b2832;--muted:#627079;--line:#d6d9d7;--accent:#096a68;--danger:#a34b36;--base:#fff;--bg2:#eeefea}*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif;color:var(--ink);background:var(--paper);font-size:14px}button,select,input{font:inherit}button{cursor:pointer}
+header{background:#19323b;color:#fff;padding:25px max(20px,calc((100vw - 1280px)/2));display:flex;justify-content:space-between;align-items:center;gap:20px}header h1{font-size:25px;letter-spacing:-1.2px;margin:0 0 5px}header p{color:#b8c9cd;margin:0;font-size:12px}.eyebrow{font-size:10px;letter-spacing:2.5px;color:#78bbb2;font-weight:700;margin-bottom:10px}.version{border:1px solid #4b666b;padding:8px 12px;font-size:12px;white-space:nowrap}
+main{max-width:1280px;margin:24px auto;padding:0 20px;display:grid;grid-template-columns:300px minmax(0,1fr);gap:20px}aside,section{background:var(--base);border:1px solid var(--line);border-radius:4px}aside{padding:19px;align-self:start;position:sticky;top:16px}.panel{padding:24px 28px;margin-bottom:17px}h2{font-size:17px;margin:0 0 15px;letter-spacing:-.4px}h3{font-size:12px;margin:20px 0 8px;color:var(--muted);font-weight:750;letter-spacing:.25px}.caption{font-size:12px;line-height:1.6;color:var(--muted)}.input-row{margin-bottom:12px}label.small{display:block;font-size:11px;font-weight:750;color:var(--muted);margin-bottom:6px}select,input:not([type=file]){width:100%;border:1px solid #cdd3d1;background:#fff;border-radius:3px;padding:9px 10px;color:var(--ink)}input[type=file]{width:100%;font-size:11px;max-width:100%}select:focus,input:focus{outline:2px solid #afd7d2}button.primary{background:var(--accent);color:white;border:1px solid var(--accent);padding:11px 16px;font-weight:750;border-radius:3px}button.secondary{background:transparent;border:1px solid #b8c4c4;padding:9px 10px;border-radius:3px;color:var(--ink)}button:disabled{opacity:.4;cursor:not-allowed}.wide{width:100%}button + button{margin-left:8px}.aside-actions{margin-top:16px}.mini{font-size:11px}.muted{color:var(--muted)}.divider{height:1px;background:var(--line);margin:17px 0}
+#status{font-size:12px;line-height:1.6;white-space:pre-wrap;max-height:180px;overflow:auto;border-left:3px solid #bcc5c2;background:var(--bg2);padding:10px}.error{color:var(--danger)!important}.tag{display:inline-flex;background:var(--bg2);padding:5px 7px;font-size:11px;border:1px solid #dce1de}.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.hero{display:flex;justify-content:space-between;align-items:start;gap:20px}.hero h2{font-size:21px}.hero p{margin:0;color:var(--muted);font-size:12px}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:19px}.kpi{background:white;padding:18px 16px;min-height:94px}.kpi-label{font-size:11px;color:var(--muted);margin-bottom:10px}.kpi-val{font-weight:700;font-size:26px;letter-spacing:-.8px;font-variant-numeric:tabular-nums}.kpi-sub{font-size:11px;color:var(--muted);margin-top:4px}.toolbar{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:17px}.toolbar button{font-size:12px}.tablewrap{overflow:auto;border:1px solid var(--line)}table{width:100%;border-collapse:collapse;white-space:nowrap;font-size:12px}th{background:#edf1ef;color:#39505a;font-size:11px;position:sticky;top:0}td,th{text-align:right;padding:11px 10px;border-bottom:1px solid #e6e9e7}th:first-child,td:first-child{text-align:left;font-weight:650}tr:last-child td{border-bottom:0}tbody tr:hover{background:#f6faf8}.num{font-variant-numeric:tabular-nums}.ok{color:#087358;font-weight:750}.bad{color:#a34936;font-weight:750}.warn{color:#a16b27;font-weight:750}.empty{padding:45px 20px;text-align:center;color:var(--muted);line-height:1.8;border:1px dashed var(--line)}.chart{width:100%;min-height:235px;display:block}.foot{font-size:11px;line-height:1.7;color:var(--muted)}.check-row{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink);margin:10px 0}.check-row input{width:auto}.error-panel{border-left:3px solid var(--danger);padding:10px;background:#fdf3ef;margin-top:12px}.pill{padding:3px 6px;border-radius:2px;background:#ecf3f0;font-size:10px}input[type=number]{-moz-appearance:textfield}.year-range{display:flex;align-items:center;gap:8px}.year-range input{min-width:0;width:47%;}.method-note{background:#f4f7f5;padding:12px;border-left:3px solid var(--accent)}
+@media(max-width:840px){main{grid-template-columns:1fr}aside{position:static}.kpis{grid-template-columns:repeat(2,1fr)}.panel{padding:18px}header{padding:20px}.hero{flex-direction:column}}
+@media print{aside,header,.toolbar button{display:none!important}main{display:block;padding:0;margin:0}.panel{border:0}.chart{height:240px}}
+
+/* 0.7 custom station picker */
+.picker{border:1px solid #ced9d5;background:#fafbf9;border-radius:4px;padding:11px;margin:4px 0 12px}
+.picker-title{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:7px}
+.picker-title b{font-size:12px}.picker-count{color:#0b6867;font-size:11px;font-weight:750}
+.picker-actions{display:flex;gap:5px;margin:7px 0;flex-wrap:wrap}
+.picker-actions button,.group-toggle{border:1px solid #bcc9c6;border-radius:3px;background:white;color:var(--ink);font-size:11px;padding:5px 7px;margin:0}
+.picker-actions button:hover,.group-toggle:hover{background:#e5f1ed}
+#stationSearch{width:100%;padding:7px 9px;font-size:12px}
+.station-scroller{max-height:310px;overflow-y:auto;overscroll-behavior:contain;background:white;border:1px solid #dfe6e1;margin-top:7px}
+.station-group-title{display:flex;align-items:center;justify-content:space-between;background:#eef2ee;padding:7px 8px;border-bottom:1px solid #dce5df;font-size:11px;font-weight:750;position:sticky;top:0;z-index:1}
+.station-group-title .group-actions{display:flex;gap:4px}
+.station-check{display:flex;align-items:center;gap:7px;padding:7px 9px;border-bottom:1px solid #f1f1ee;font-size:11px;cursor:pointer;line-height:1.35}
+.station-check:hover{background:#f6faf8}.station-check input{margin:0;accent-color:#096a68;flex:none}
+.station-check .station-code{color:#81918e;font-size:10px;margin-left:auto}
+.picker-note{margin:8px 0 0;color:#667775;font-size:10.5px;line-height:1.55}
+.picker-empty{padding:12px;font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header><div><div class="eyebrow">MARINE CLIMATE / STATISTICS</div><h1>해양관측 통계 분석실</h1><p>자동 자료 불러오기 · 지점 개별 선택 · 부분 월 동일기간 비교 · 월별 / 계절별 통계</p></div><span class="version">VERSION 0.9 · 2-A</span></header>
+<main><aside>
+<h2>01 / 관측자료</h2>
+<div id="hostedDataNote" class="caption method-note" aria-live="polite" style="margin:0 0 12px">
+  <b>저장된 관측자료 자동 불러오기 준비 중</b><div id="remoteDataDetails" style="margin-top:5px">GitHub Pages에 저장한 일자료를 읽습니다. API를 직접 호출하지 않습니다.</div>
+</div>
+<button id="reloadHostedBtn" class="secondary wide" style="margin-bottom:12px" type="button">저장된 관측자료 다시 불러오기</button>
+<details style="margin-bottom:12px"><summary class="mini" style="cursor:pointer;font-weight:700">수동 CSV 업로드 (자동 로딩 오류 시 사용)</summary><div style="padding-top:12px">
+<div class="input-row"><label class="small" for="marineFiles">해양기상부이 일자료 CSV (다중 선택 가능)</label><input id="marineFiles" type="file" multiple accept=".csv,.txt"></div>
+<div class="input-row"><label class="small" for="coastalFiles">연안·파고부이 일자료 CSV (다중 선택 가능)</label><input id="coastalFiles" type="file" multiple accept=".csv,.txt"></div>
+<div class="input-row"><label class="small" for="stationFile">추가 매핑표 CSV (선택 · 공식 해역 구분 확인 시 대체 가능)</label><input id="stationFile" type="file" accept=".csv,.txt"></div>
+<div class="input-row"><label class="small" for="charset">원자료 텍스트 인코딩</label><select id="charset"><option value="auto" selected>자동 인식 (권장)</option><option value="utf-8">UTF-8</option><option value="euc-kr">EUC-KR / CP949</option></select></div>
+<button id="loadBtn" class="primary wide">CSV 불러오기 및 분석 준비</button>
+</div></details>
+<p class="foot" style="margin:3px 0 8px">자료 출처: <a href="https://data.kma.go.kr/" target="_blank" rel="noopener noreferrer">기상청 기상자료개방포털</a> · 비공식 분석 도구 · 제공 자료는 2026-10-20 다운로드 스냅샷</p>
+<div class="tags" id="fileTags"><span class="tag">자동 다운로드 준비 중</span></div><p class="foot">사이트에서는 원자료가 자동으로 불러와집니다. 필요할 때만 위 수동 업로드를 사용하세요. 해양기상부이 17개 지점번호·CP949 인코딩은 자동 인식합니다. 해양기상부이의 분석대상 외 지점은 자동 제외됩니다. 2026년 관측지점 메타데이터로 지점명을 자동 인식합니다. 두 원본 CSV를 함께 넣으세요. 2025·2026년 공통 지점·공통 월의 전년비교를 계산합니다. 공식 73개 집합과는 아직 대조 중입니다.</p>
+<div class="divider"></div>
+<h2>02 / 분석 조건</h2>
+<div class="input-row"><label class="small">관측망</label><select id="source"><option value="marine">해양기상부이 (17)</option><option value="coastal">연안·파고부이 (지점명/해역 자동 인식 · 참고 통계)</option></select></div>
+<div class="input-row"><label class="small">분석 변수</label><select id="variable"><option value="sst">해수면 온도 (℃)</option><option value="wave">평균 유의파고 (m)</option></select></div>
+<div class="input-row"><label class="small">대상 연도</label><input id="year" type="number" value="2026" min="2000" max="2100"></div>
+<div class="input-row"><label class="small">분석 기간</label><select id="period"><option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option><option value="3,4,5">봄철 (3~5월)</option><option value="6,7,8" selected>여름철 (6~8월)</option><option value="9,10,11">가을철 (9~11월)</option><option value="6,7,8,9">6~9월</option><option value="7,8,9">7~9월</option><option value="1,2,3,4,5,6,7,8,9,10,11,12">연평균</option><option value="custom">직접 선택</option></select></div>
+<div id="coverageInfo" class="caption method-note" style="margin:0 0 14px" aria-live="polite">업로드한 자료를 기준으로 대상 연도에서 가장 마지막에 관측된 날짜를 확인하고, 다른 연도에도 동일한 날짜 범위를 적용합니다.</div>
+<div class="input-row" id="customWrap" hidden><label class="small">월 번호 (예: 7,8,9)</label><input id="customMonths" value="7,8,9"></div>
+<div class="input-row"><label class="small">비교 기간</label><select id="baseline"><option value="10" selected>최근 10년 (대상 연도 포함)</option><option value="5">최근 5년 (대상 연도 포함)</option><option value="all">보유 기간 전체 (대상 연도까지)</option><option value="custom">시작·종료 연도 직접 선택</option></select></div>
+<div class="input-row" id="customYearsWrap" hidden><label class="small">비교 연도 범위 (시작 ~ 끝, 양끝 포함)</label><div class="year-range"><input id="baselineStart" type="number" min="1900" max="2100" value="2017" aria-label="비교 시작 연도"><span>~</span><input id="baselineEnd" type="number" min="1900" max="2100" value="2026" aria-label="비교 종료 연도"></div><p class="foot">대상 연도가 이 범위 밖이면 평균 대비 차이만 계산하고 순위는 표시하지 않습니다.</p></div>
+<div class="input-row"><label class="small">해역 / 지점</label><select id="region"><option value="all">전해역 및 해역별</option><option value="서해">서해</option><option value="남해">남해</option><option value="동해">동해</option><option value="stations">지점별 전체</option></select></div>
+<div class="input-row"><div class="picker" aria-label="분석 지점 직접 선택">
+<div class="picker-title"><b>분석에 포함할 지점 선택</b><span id="stationSelectedCount" class="picker-count">CSV를 먼저 불러오세요</span></div>
+<input id="stationSearch" type="search" placeholder="지점명 또는 지점번호 검색" aria-label="지점명 또는 지점번호 검색">
+<div class="picker-actions"><button type="button" id="selectAll">전체 선택</button><button type="button" id="selectNone">전체 해제</button><button type="button" id="selectInvert">선택 반전</button><button type="button" id="downloadSelection">선택 명단 CSV</button></div>
+<div class="input-row" style="margin:6px 0"><label class="small" for="stationSelectionFile">이전에 저장한 선택 명단 불러오기 (선택)</label><input id="stationSelectionFile" type="file" accept=".csv,.txt"></div>
+<div id="stationPickerList" class="station-scroller"><div class="picker-empty">원본 CSV를 불러오면 지점 목록이 표시됩니다.</div></div>
+<p class="picker-note">선택 지점만 평균·추세·순위에 반영합니다. 전해역 값은 <b>선택 지점이 있는 해역만</b> 해역별 동일가중으로 계산하며, 해당 연도에 선택한 해역의 값이 빠지면 연도별 전해역 값은 결측 처리합니다. 원래 17개 전체를 선택하면 기존 공식 통계방식과 같습니다.</p>
+</div></div>
+<div class="divider"></div>
+<h2>03 / 계산 방식</h2>
+<div class="caption method-note"><b>보도자료 재현식 (고정)</b><br>① 유효 일자료만 사용하며 결측률 하한선은 두지 않습니다.<br>② 해역별 각 월의 모든 유효 지점×일 수온값을 평균합니다.<br>③ 복수 월은 월평균을 같은 가중치로 평균합니다.<br>④ 전해역은 선택 지점이 존재하는 해역별 평균을 동일가중합니다.<br>⑤ 순위는 소수 첫째 자리 반올림값으로 비교하며 동률은 공동순위입니다.<br>⑥ <b>당월 진행 중인 자료:</b> 대상 연도의 마지막 유효일까지만 사용하며, 전년도·비교기간의 모든 연도에도 같은 월의 1일부터 동일한 날짜까지 적용합니다. 계절·여러 월을 선택해도 월별로 각각 적용합니다.<br><br><b>연안·파고부이:</b> 대상 연도 및 전년도에 같은 지점·같은 월의 유효값이 모두 있는 경우에 비교하며, 각 월의 동일한 종료일을 적용합니다. 공식 73개 집합 및 해역 구분과의 완전 일치는 미확인입니다.</div>
+<div class="aside-actions"><button id="analyseBtn" class="primary wide">통계 계산</button></div>
+<h3>자료 읽기 현황</h3><div id="status">저장된 일자료를 자동으로 불러오는 중입니다.</div>
+</aside>
+<div>
+<section class="panel"><div class="hero"><div><h2 id="viewTitle">분석 대기</h2><p id="subtitle">자료 업로드 후 통계 계산을 누르세요.</p></div><span class="tag" id="validity">데이터 없음</span></div>
+<div class="kpis"><div class="kpi"><div class="kpi-label">선택 지점 해역평균</div><div class="kpi-val" id="kval">—</div><div class="kpi-sub" id="kunits">℃ / m</div></div><div class="kpi"><div class="kpi-label">전년 차이</div><div class="kpi-val" id="kprev">—</div><div class="kpi-sub">현재 − 전년</div></div><div class="kpi"><div class="kpi-label">비교기간 내 순위</div><div class="kpi-val" id="krank">—</div><div class="kpi-sub" id="krange">해양기상부이 전용</div></div><div class="kpi"><div class="kpi-label">대상 연도 유효 지점</div><div class="kpi-val" id="ksites">—</div><div class="kpi-sub" id="kmeta">자료 미입력</div></div></div>
+</section>
+<section class="panel"><div class="toolbar"><h2 style="margin:0">해역별 / 지점별 계산 결과</h2><div><button class="secondary" id="downloadCSV" disabled>CSV 내려받기</button><button class="secondary" id="downloadSVG" disabled>그림(SVG) 내려받기</button></div></div><div id="tableSlot" class="empty">표시할 결과가 없습니다.<br>일자료 CSV를 불러와 주세요.</div><p class="foot">표시는 소수 첫째 자리이며, 내부 계산은 반올림 전 수치로 수행합니다. 해당 기간 유효 일자료가 없는 지점·월은 제외합니다. 통계값은 다운로드 시점의 자료 상태에 따라 달라질 수 있습니다.</p></section>
+<section class="panel"><div class="toolbar"><h2 style="margin:0">연도별 변화</h2><span class="pill" id="chartLabel">전해역</span></div><div id="chartSlot" class="empty">연도별 그래프가 여기에 표시됩니다.</div></section>
+<section class="panel"><h2>지점 구성 · 유효성</h2><div id="stationInfo" class="caption">해양기상부이 17개 지점 코드는 내장돼 있어 포털 원본 CSV를 그대로 넣을 수 있습니다. 관측지점정보 2개 CSV(2026.10.21) 기준 지점명·좌표 내장. 연안 전환·신규 13개 후보(신창 포함)를 결합하며 현재 원본에서 72개 고유 지점이 확인됩니다. 해역 분류 일부는 좌표 추정이므로 해역평균은 잠정값입니다.</div><div style="margin-top:14px"><button class="secondary" id="downloadStations" disabled>2025·2026년 지점별 자료 현황 CSV 받기</button></div><div class="divider"></div><p class="foot">이 프로그램은 네트워크 요청이나 원격 업로드를 수행하지 않습니다. 파일은 브라우저 메모리에서 처리합니다. 현재는 CSV만 지원하며 Excel(XLSX)은 CSV로 저장해서 불러와야 합니다. 임의 지점, 결측 구간, 변경된 일자료는 계산 결과를 바꿀 수 있습니다.</p></section>
+</div></main>
+<script>
+(()=>{'use strict';
+const MARINE_IDS={"21229":{"name":"울릉도","region":"동해"},"22101":{"name":"덕적도","region":"서해"},"22102":{"name":"칠발도","region":"서해"},"22103":{"name":"거문도","region":"남해"},"22104":{"name":"거제도","region":"남해"},"22105":{"name":"동해","region":"동해"},"22106":{"name":"포항","region":"동해"},"22107":{"name":"마라도","region":"남해"},"22108":{"name":"외연도","region":"서해"},"22183":{"name":"신안","region":"서해"},"22184":{"name":"추자도","region":"남해"},"22185":{"name":"인천","region":"서해"},"22186":{"name":"부안","region":"서해"},"22187":{"name":"서귀포","region":"남해"},"22188":{"name":"통영","region":"남해"},"22189":{"name":"울산","region":"동해"},"22190":{"name":"울진","region":"동해"}};
+const KNOWN_WAVE={"22441":{"name":"독도","region":"동해","basis":"기상청 2024 해양기후 표"},"22442":{"name":"혈암","region":"동해","basis":"기상청 2024 해양기후 표"},"22443":{"name":"구암","region":"동해","basis":"기상청 2024 해양기후 표"},"22444":{"name":"신진도","region":"서해","basis":"기상청 2024 해양기후 표"},"22445":{"name":"삽시도","region":"서해","basis":"기상청 2024 해양기후 표"},"22446":{"name":"말도","region":"서해","basis":"기상청 2024 해양기후 표·지리보완"},"22447":{"name":"옥도","region":"서해","basis":"기상청 2024 해양기후 표·지리보완"},"22448":{"name":"하납덕도","region":"서해","basis":"기상청 2024 해양기후 표·지리보완"},"22449":{"name":"진도","region":"서해","basis":"기상청 2024 해양기후 표·지리보완"},"22450":{"name":"두미도","region":"남해","basis":"기상청 2024 해양기후 표"},"22451":{"name":"연곡","region":"동해","basis":"기상청 2024 해양기후 표"},"22452":{"name":"죽변","region":"동해","basis":"기상청 2024 해양기후 표"},"22453":{"name":"구룡포","region":"동해","basis":"기상청 2024 해양기후 표"},"22454":{"name":"장안","region":"남해","basis":"기상청 2024 해양기후 표"},"22455":{"name":"해금강","region":"남해","basis":"기상청 2024 해양기후 표"},"22456":{"name":"청산도","region":"남해","basis":"기상청 2024 해양기후 표"},"22457":{"name":"제주항","region":"남해","basis":"기상청 2024 해양기후 표"},"22458":{"name":"중문","region":"남해","basis":"기상청 2024 해양기후 표"},"22459":{"name":"오륙도","region":"남해","basis":"기상청 2024 해양기후 표"},"22460":{"name":"다대포","region":"남해","basis":"기상청 2024 해양기후 표"},"22461":{"name":"이작도","region":"서해","basis":"기상청 2024 해양기후 표"},"22462":{"name":"안마도","region":"서해","basis":"기상청 2024 해양기후 표·지리보완"},"22463":{"name":"고성","region":"동해","basis":"기상청 2024 해양기후 표·지리보완"},"22464":{"name":"울릉읍","region":"동해","basis":"기상청 2024 해양기후 표"},"22465":{"name":"후포","region":"동해","basis":"기상청 2024 해양기후 표"},"22466":{"name":"금오도","region":"남해","basis":"기상청 2024 해양기후 표"},"22467":{"name":"한산도","region":"남해","basis":"기상청 2024 해양기후 표"},"22468":{"name":"추자도","region":"남해","basis":"기상청 2024 해양기후 표"},"22469":{"name":"우도","region":"남해","basis":"기상청 2024 해양기후 표"},"22470":{"name":"풍도","region":"서해","basis":"지리분류"},"22471":{"name":"토성","region":"동해","basis":"기상청 2024 해양기후 표"},"22472":{"name":"자월도","region":"서해","basis":"기상청 2024 해양기후 표"},"22473":{"name":"서천","region":"서해","basis":"기상청 2024 해양기후 표"},"22474":{"name":"군산","region":"서해","basis":"기상청 2024 해양기후 표"},"22475":{"name":"영광","region":"서해","basis":"기상청 2024 해양기후 표"},"22476":{"name":"가파도","region":"남해","basis":"기상청 2024 해양기후 표"},"22477":{"name":"노화도","region":"남해","basis":"기상청 2024 해양기후 표"},"22478":{"name":"고흥","region":"남해","basis":"기상청 2024 해양기후 표"},"22479":{"name":"맹방","region":"동해","basis":"기상청 2024 해양기후 표"},"22480":{"name":"맹골수도","region":"서해","basis":"기상청 2024 해양기후 표"},"22481":{"name":"맹골수도","region":"서해","basis":"기상청 2024 해양기후 표"},"22483":{"name":"간절곶","region":"동해","basis":"기상청 2024 해양기후 표"},"22484":{"name":"잠도","region":"남해","basis":"기상청 2024 해양기후 표·지리보완"},"22485":{"name":"소매물도","region":"남해","basis":"기상청 2024 해양기후 표"},"22486":{"name":"협재","region":"남해","basis":"기상청 2024 해양기후 표"},"22487":{"name":"천수만","region":"서해","basis":"기상청 2024 해양기후 표"},"22488":{"name":"안면도","region":"서해","basis":"기상청 2024 해양기후 표"},"22489":{"name":"대치마도","region":"서해","basis":"기상청 2024 해양기후 표"},"22490":{"name":"월포","region":"동해","basis":"기상청 2024 해양기후 표"},"22491":{"name":"김녕","region":"남해","basis":"기상청 2024 해양기후 표"},"22492":{"name":"비안도","region":"서해","basis":"기상청 2024 해양기후 표"},"22493":{"name":"자은","region":"서해","basis":"기상청 2024 해양기후 표"},"22494":{"name":"낙월","region":"서해","basis":"기상청 2024 해양기후 표"},"22495":{"name":"신산","region":"남해","basis":"기상청 2024 해양기후 표"},"22496":{"name":"장봉도","region":"서해","basis":"기상청 2024 해양기후 표"},"22497":{"name":"변산","region":"서해","basis":"기상청 2024 해양기후 표"},"22498":{"name":"남해","region":"남해","basis":"기상청 2024 해양기후 표"},"22499":{"name":"연화도","region":"남해","basis":"기상청 2024 해양기후 표"},"22500":{"name":"조도","region":"서해","basis":"기상청 2024 해양기후 표"},"22501":{"name":"사량도","region":"남해","basis":"기상청 2024 해양기후 표"},"22502":{"name":"나로도","region":"남해","basis":"기상청 2024 해양기후 표"},"22503":{"name":"불무도","region":"서해","basis":"기상청 2024 해양기후 표"},"22504":{"name":"위도","region":"서해","basis":"기상청 2024 해양기후 표"},"22505":{"name":"영락","region":"남해","basis":"기상청 2024 해양기후 표"},"22506":{"name":"울릉서부","region":"동해","basis":"기상청 2024 해양기후 표"},"22507":{"name":"초도","region":"남해","basis":"기상청 2024 해양기후 표"},"22509":{"name":"장안퇴","region":"서해","basis":"기상청 2024 해양기후 표·지리보완"},"22511":{"name":"기장","region":"남해","basis":"기상청 2024 해양기후 표·지리보완"},"22512":{"name":"지심도","region":"남해","basis":"기상청 2024 해양기후 표·지리보완"},"22513":{"name":"이수도","region":"남해","basis":"기상청 2024 해양기후 표·지리보완"},"22514":{"name":"구엄","region":"남해","basis":"기상청 2024 해양기후 표·지리보완"},"22515":{"name":"위미","region":"남해","basis":"기상청 2024 해양기후 표·지리보완"},"22516":{"name":"신창","region":"남해","basis":"기상청 2024 해양기후 표·지리보완"},"22517":{"name":"하도","region":"남해","basis":"기상청 2024 해양기후 표·지리보완"},"22518":{"name":"당사","region":"동해","basis":"기상청 2024 해양기후 표·지리보완"},"22519":{"name":"고성","region":"동해","basis":"기상청 2024 해양기후 표·지리보완"},"22520":{"name":"강릉","region":"동해","basis":"기상청 2024 해양기후 표"},"22521":{"name":"삼척","region":"동해","basis":"기상청 2024 해양기후 표·지리보완"},"22522":{"name":"연평도","region":"서해","basis":"기상청 2024 해양기후 표·지리보완"},"22523":{"name":"죽변","region":"동해","basis":"기상청 2024 해양기후 표"},"22524":{"name":"구룡포","region":"동해","basis":"기상청 2024 해양기후 표"},"22526":{"name":"녹도","region":"서해","basis":"기상청 2024 해양기후 표·지리보완"},"22601":{"name":"하납덕도","region":"서해","basis":"기상청 2024 해양기후 표·지리보완"},"22602":{"name":"옥도","region":"서해","basis":"기상청 2024 해양기후 표·지리보완"}};
+const COASTAL_CANDIDATES={"22446":{"name":"내파수도","region":"서해","evidence":"2026 관측지점정보(전환시점/신규 포함)"},"22485":{"name":"소매물도","region":"남해","evidence":"2026 관측지점정보(전환시점/신규 포함)"},"22489":{"name":"대치마도","region":"서해","evidence":"2026 관측지점정보(전환시점/신규 포함)"},"22493":{"name":"자은","region":"서해","evidence":"2026 관측지점정보(전환시점/신규 포함)"},"22510":{"name":"위도동부","region":"서해","evidence":"2026 관측지점정보(전환시점/신규 포함)"},"22512":{"name":"지심도","region":"남해","evidence":"2026 관측지점정보(전환시점/신규 포함)"},"22513":{"name":"이수도","region":"남해","evidence":"2026 관측지점정보(전환시점/신규 포함)"},"22514":{"name":"구엄","region":"남해","evidence":"2026 관측지점정보(전환시점/신규 포함)"},"22515":{"name":"위미","region":"남해","evidence":"2026 관측지점정보(전환시점/신규 포함)"},"22516":{"name":"신창","region":"남해","evidence":"2026 관측지점정보(전환시점/신규 포함)"},"22520":{"name":"강릉","region":"동해","evidence":"2026 관측지점정보(전환시점/신규 포함)"},"22522":{"name":"연평도","region":"서해","evidence":"2026 관측지점정보(전환시점/신규 포함)"},"22523":{"name":"죽변","region":"동해","evidence":"2026 관측지점정보(전환시점/신규 포함)"}};
+const MARINE={"서해":["덕적도","칠발도","외연도","신안","인천","부안"],"남해":["거문도","거제도","마라도","추자도","서귀포","통영"],"동해":["울릉도","동해","포항","울산","울진"]};
+const $=id=>document.getElementById(id);const STORE={records:[],metadata:new Map(),badFiles:[],files:[],samples:[],result:null,normalized:null,stationCatalog:{marine:[],coastal:[]},stationSelections:{marine:null,coastal:null}};
+const KNOWN=new Map(Object.entries(MARINE).flatMap(([region,stations])=>stations.map(name=>[norm(name),region])));
+function norm(x){return String(x??'').replace(/\s+/g,'').toLowerCase().replace(/[\[\](){}]/g,'');}
+function asDate(s){s=String(s??'').trim();let m=s.match(/^(\d{4})[.\/-]?(\d{1,2})[.\/-]?(\d{1,2})/); if(!m)return null;let y=+m[1],mo=+m[2],d=+m[3];if(mo<1||mo>12||d<1||d>31)return null;let date=new Date(y,mo-1,d);if(date.getFullYear()!==y||date.getMonth()!==mo-1||date.getDate()!==d)return null;return {date:`${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`,year:y,month:mo};}
+function number(x){let s=String(x??'').trim().replace(/,/g,'');if(!s||['-','--','nan','null','none','x','*'].includes(s.toLowerCase()))return NaN;let n=Number(s);return Number.isFinite(n)&&![-99,-999,-9999,9999,99999].includes(n)?n:NaN;}
+function csvParse(src){src=src.replace(/^\uFEFF/,'');let first=src.split(/\r?\n/).find(x=>x.trim()&&!x.trim().startsWith('#'))||'';let delim=['\t',',',';'].map(d=>({d,n:first.split(d).length})).sort((a,b)=>b.n-a.n)[0].d;let rows=[],row=[],cur='',quoted=false;
+ for(let i=0;i<src.length;i++){let c=src[i];if(c==='"'){if(quoted&&src[i+1]==='"'){cur+='"';i++;}else quoted=!quoted;}else if(c===delim&&!quoted){row.push(cur);cur='';}else if((c==='\n'||c==='\r')&&!quoted){if(c==='\r'&&src[i+1]==='\n')i++;row.push(cur);cur='';if(row.some(x=>x.trim()))rows.push(row);row=[];}else cur+=c;}
+ row.push(cur);if(row.some(x=>x.trim()))rows.push(row);return rows.filter(r=>!String(r[0]||'').trim().startsWith('#'));}
+function headerIndex(headers,candidates){const nn=headers.map(norm);for(let wanted of candidates){let i=nn.findIndex(s=>s===norm(wanted));if(i>=0)return i;}for(let wanted of candidates){let i=nn.findIndex(s=>s.includes(norm(wanted)));if(i>=0)return i;}return -1;}
+function getColumns(head){return {date:headerIndex(head,['일시','날짜','일자','관측일','date','tm','시간']),id:headerIndex(head,['지점번호','지점코드','지점ID','stnId','stn','station_id','지점']),name:headerIndex(head,['지점명','관측소명','부이명','station_name','지점 이름']),sst:headerIndex(head,['평균 수온(°C)','평균 수온(℃)','평균수온','해수면 온도','해수면온도','수온','water_temperature','sst','wt']),wave:headerIndex(head,['평균 유의 파고(m)','평균 유의파고(m)','평균유의파고','유의파고','significant_wave_height','swh','wave']),qc:headerIndex(head,['활용','사용여부','활용여부','use_flag'])};}
+function findHeader(rows){for(let i=0;i<Math.min(15,rows.length);i++){let c=getColumns(rows[i]);if(c.date>=0&&(c.id>=0||c.name>=0)&&(c.sst>=0||c.wave>=0))return i;}return -1;}
+async function readText(file,charset){
+ const buf=await file.arrayBuffer();
+ if(charset==='auto'){
+   try{return new TextDecoder('utf-8',{fatal:true}).decode(buf);}
+   catch(e){return new TextDecoder('euc-kr',{fatal:true}).decode(buf);}
+ }
+ return new TextDecoder(charset,{fatal:true}).decode(buf);
+}
+function parseMetadata(text){const rows=csvParse(text);if(!rows.length)throw new Error('지점 CSV가 비어 있습니다');let h=rows[0],code=headerIndex(h,['station_id','지점코드','지점','지점번호']),name=headerIndex(h,['station_name','지점명','부이명']),region=headerIndex(h,['region','해역']),type=headerIndex(h,['type','관측망','부이유형']);if(name<0||region<0||type<0)throw new Error('매핑 파일은 station_name,region,type 컬럼이 필요합니다');let out=new Map();for(let r of rows.slice(1)){let n=String(r[name]||'').trim(),id=code>=0?String(r[code]||'').trim():'';if(!n&&!id)continue;let obj={id,name:n,region:String(r[region]||'').trim(),type:String(r[type]||'').trim()};if(n)out.set(norm(n),obj);if(id)out.set(norm(id),obj);}return out;}
+function asRows(src,text){const rows=csvParse(text);let hidx=findHeader(rows);if(hidx<0)throw new Error('헤더를 찾지 못했습니다 (필요: 날짜·지점·수온 또는 유의파고). 첫 행: '+(rows[0]||[]).slice(0,8).join(' | '));const c=getColumns(rows[hidx]);let data=[],reject=0,flagSkip=0;
+ for(let r of rows.slice(hidx+1)){let dt=asDate(r[c.date]);if(!dt){reject++;continue;}if(c.qc>=0&&String(r[c.qc]??'').trim()!=='1'){flagSkip++;continue;}let id=c.id>=0?String(r[c.id]||'').trim():'',name=c.name>=0?String(r[c.name]||'').trim():'';if(!id&&!name){reject++;continue;}let sst=c.sst>=0?number(r[c.sst]):NaN,wave=c.wave>=0?number(r[c.wave]):NaN;if(wave<0)wave=NaN;if(!Number.isFinite(sst)&&!Number.isFinite(wave)){reject++;continue;}data.push({...dt,id,name,source:src,sst,wave});}
+ return {data,reject,flagSkip,head:rows[hidx],sample:rows[hidx+1]||[]};}
+function groupName(x){return x.type.includes('연안')||x.type.includes('파고')?'coastal':x.type.includes('해양기상')?'marine':null;}
+function stationData(){
+ const maps=STORE.metadata,out=[],unknown=new Map(),used={marine:new Set(),coastal:new Set()},dup=new Map();
+ let duplicated=0, overlap=0;
+ for(const rec of STORE.records){
+   const coast=COASTAL_CANDIDATES[rec.id];
+   const effectiveSource=coast?'coastal':rec.source;
+   const meta=maps.get(norm(rec.id))||maps.get(norm(rec.name));
+   let display=meta?.name||rec.name||rec.id;
+   let region=meta?.region||KNOWN.get(norm(rec.name));
+   let belong=meta?groupName(meta):null;
+   if(rec.source==='marine'){
+     let official=MARINE_IDS[rec.id];
+     if(official){display=official.name;region=official.region;belong='marine';}
+     else if(coast){display=meta?.name||coast.name||('지점 '+rec.id);region=meta?.region||coast.region||'미분류';belong='coastal';}
+     else if(!rec.id&&KNOWN.has(norm(rec.name))){display=rec.name;region=KNOWN.get(norm(rec.name));belong='marine';}
+     else belong='unknown';
+   }
+   if(rec.source==='coastal'){
+     if(coast){display=meta?.name||coast.name||('지점 '+rec.id);region=meta?.region||coast.region||'미분류';belong='coastal';}
+     else if(!meta){belong='coastal';region=KNOWN_WAVE[rec.id]?.region||'미분류';display=KNOWN_WAVE[rec.id]?.name||rec.name||('지점 '+rec.id);}
+     else if(belong!=='coastal')belong='unknown';
+   }
+   if(effectiveSource==='marine'&&!['서해','남해','동해'].includes(region))belong='unknown';
+   if(belong==='unknown'||belong!==effectiveSource){
+     let k=rec.source+'|'+rec.id+'|'+rec.name;
+     unknown.set(k,{id:rec.id,name:rec.name,source:rec.source});continue;
+   }
+   if(!['서해','남해','동해'].includes(region))region='미분류';
+   let key=rec.id||norm(display);used[effectiveSource].add(key);
+   let dk=effectiveSource+'|'+key+'|'+rec.date;
+   let old=dup.get(dk);
+   if(old){
+     duplicated++;
+     if(old.rawSource!==rec.source){
+       overlap++;
+       // A transformed coastal station may appear on both download menus.
+       // Prefer the record from the current marine menu for the same date.
+       if(rec.source==='marine'){
+         old._sstSum=Number.isFinite(rec.sst)?rec.sst:0;old._sstCount=Number.isFinite(rec.sst)?1:0;
+         old._waveSum=Number.isFinite(rec.wave)?rec.wave:0;old._waveCount=Number.isFinite(rec.wave)?1:0;
+         old.rawSource='marine';
+       }
+     } else {
+       if(Number.isFinite(rec.sst)){old._sstSum+=rec.sst;old._sstCount++;}
+       if(Number.isFinite(rec.wave)){old._waveSum+=rec.wave;old._waveCount++;}
+     }
+   } else dup.set(dk,{...rec,source:effectiveSource,rawSource:rec.source,region,station:display,stationKey:key,
+      _sstSum:Number.isFinite(rec.sst)?rec.sst:0,_sstCount:Number.isFinite(rec.sst)?1:0,
+      _waveSum:Number.isFinite(rec.wave)?rec.wave:0,_waveCount:Number.isFinite(rec.wave)?1:0});
+ }
+ for(const r of dup.values()){
+   r.sst=r._sstCount?r._sstSum/r._sstCount:NaN;
+   r.wave=r._waveCount?r._waveSum/r._waveCount:NaN;out.push(r);
+ }
+ return {rows:out,unknown:[...unknown.values()],used,duplicated,overlap};
+}
+// Dynamic, local-only station selection. Keys are stable station IDs.
+function normalizedRows(){if(!STORE.normalized)STORE.normalized=stationData();return STORE.normalized;}
+function makeStationCatalog(){
+ const seen={marine:new Map(),coastal:new Map()};
+ for(const r of normalizedRows().rows){
+   if(!seen[r.source]||!r.stationKey)continue;
+   if(!seen[r.source].has(r.stationKey))seen[r.source].set(r.stationKey,{id:r.stationKey,name:r.station,region:r.region});
+ }
+ for(const src of ['marine','coastal'])STORE.stationCatalog[src]=[...seen[src].values()].sort((a,b)=>
+    ['서해','남해','동해','미분류'].indexOf(a.region)-['서해','남해','동해','미분류'].indexOf(b.region)||a.name.localeCompare(b.name,'ko')||a.id.localeCompare(b.id));
+ STORE.stationSelections={marine:null,coastal:null};
+}
+function selectedStations(source){const all=STORE.stationCatalog[source]||[],current=STORE.stationSelections[source];return current===null?new Set(all.map(x=>x.id)):new Set(current);}
+function setSelection(source,keys){STORE.stationSelections[source]=new Set(keys);renderStationPicker();if(STORE.records.length)try{refresh();}catch(e){$('status').textContent='통계 계산 오류: '+e.message;}}
+function renderStationPicker(){
+ const source=$('source').value,catalog=STORE.stationCatalog[source]||[],selected=selectedStations(source);
+ const q=norm($('stationSearch').value),show=catalog.filter(s=>!q||norm(s.name).includes(q)||norm(s.id).includes(q));
+ $('stationSelectedCount').textContent=`선택 ${selected.size} / ${catalog.length}개`;
+ const root=$('stationPickerList');root.textContent='';
+ if(!catalog.length){let div=document.createElement('div');div.className='picker-empty';div.textContent='원본 CSV를 불러오면 지점 목록이 표시됩니다.';root.appendChild(div);return;}
+ if(!show.length){let div=document.createElement('div');div.className='picker-empty';div.textContent='검색 결과가 없습니다.';root.appendChild(div);return;}
+ for(const reg of ['서해','남해','동해','미분류']){
+   const candidates=show.filter(s=>s.region===reg);if(!candidates.length)continue;
+   const regionAll=catalog.filter(s=>s.region===reg);
+   const bar=document.createElement('div');bar.className='station-group-title';
+   const title=document.createElement('span');title.textContent=`${reg} · ${regionAll.filter(s=>selected.has(s.id)).length}/${regionAll.length}`;bar.appendChild(title);
+   const actions=document.createElement('span');actions.className='group-actions';
+   for(const [label,check] of [['해역 전체 선택',true],['해역 해제',false]]){
+     const btn=document.createElement('button');btn.type='button';btn.className='group-toggle';btn.title=label;btn.textContent=check?'모두 선택':'해제';
+     btn.onclick=()=>{const next=selectedStations(source);for(const st of regionAll){if(check)next.add(st.id);else next.delete(st.id);}setSelection(source,next);};actions.appendChild(btn);
+   }
+   bar.appendChild(actions);root.appendChild(bar);
+   for(const st of candidates){
+     const label=document.createElement('label');label.className='station-check';
+     const input=document.createElement('input');input.type='checkbox';input.checked=selected.has(st.id);input.value=st.id;
+     input.onchange=()=>{const next=selectedStations(source);if(input.checked)next.add(st.id);else next.delete(st.id);setSelection(source,next);};
+     const name=document.createElement('span');name.textContent=st.name;
+     const code=document.createElement('span');code.className='station-code';code.textContent=st.id;
+     label.append(input,name,code);root.appendChild(label);
+   }
+ }
+}
+function clearResults(reason){
+ $('validity').textContent=reason;$('validity').style.background='#f8eee4';
+ $('coverageInfo').textContent=reason;
+ $('kval').textContent='—';$('kprev').textContent='—';$('krank').textContent='—';$('ksites').textContent='0';
+ $('tableSlot').innerHTML='<div class="empty">'+esc(reason)+'</div>';
+ $('chartSlot').innerHTML='<div class="empty">선택한 지점의 통계가 없습니다.</div>';
+ $('downloadCSV').disabled=true;$('downloadSVG').disabled=true;STORE.result=null;
+}
+function aggregate(records,settings){let groups=new Map(),ddup=new Map(),M=settings.months,yr=settings.year,variable=settings.variable;for(let r of records){if(r.source!==settings.source||!Number.isFinite(r[variable])||!M.includes(r.month))continue;let key=[r.stationKey,r.date].join('|');let g=ddup.get(key)||{source:r.source,region:r.region,station:r.station,stationKey:r.stationKey,year:r.year,month:r.month,date:r.date,v:0,n:0};g.v+=r[variable];g.n++;ddup.set(key,g);}
+ for(let r of ddup.values()){r.v/=r.n;let key=r.year+'|'+r.stationKey;let o=groups.get(key)||{year:r.year,station:r.station,stationKey:r.stationKey,region:r.region,months:new Map(),dates:[]};let m=o.months.get(r.month)||[];m.push(r.v);o.months.set(r.month,m);o.dates.push(r);groups.set(key,o);}
+ let byYear=new Map();for(let s of groups.values()){let present=M.filter(m=>s.months.has(m));if(!present.length||(settings.requireMonths&&present.length<M.length))continue;let monthly=present.map(m=>mean(s.months.get(m)));let val=settings.calcMode==='observationMean'?mean(s.dates.map(d=>d.v)):mean(monthly);if(!Number.isFinite(val))continue;
+ let arr=byYear.get(s.year)||[];arr.push({...s,value:val,validDays:s.dates.length,validMonths:present.length});byYear.set(s.year,arr);}
+ return byYear;}
+function mean(x){return x.length?x.reduce((a,b)=>a+b,0)/x.length:NaN;}
+function round1(x){return Math.round((x+Number.EPSILON)*10)/10;}
+function aggregateSea(stationRows,settings,sourceRows,year){if(!stationRows.length)return null;let weighted=mean(stationRows.map(s=>s.value));
+ if(settings.calcMode==='observationMean'){
+   const active=new Set(stationRows.map(s=>s.stationKey));
+   const avail=sourceRows.filter(r=>r.year===year&&r.source===settings.source&&settings.months.includes(r.month)&&active.has(r.stationKey)&&Number.isFinite(r[settings.variable]));
+   return {value:mean(avail.map(r=>r[settings.variable])),n:stationRows.length};
+ }
+ if(settings.calcMode==='dailyFirst'||settings.calcMode==='monthlyMean'){
+ let regionSet=new Set(stationRows.map(r=>r.region));let stationSet=new Set(stationRows.map(r=>r.stationKey));let avail=sourceRows.filter(r=>r.year===year&&r.source===settings.source&&settings.months.includes(r.month)&&stationSet.has(r.stationKey)&&Number.isFinite(r[settings.variable]));let daily=new Map(),monthly=new Map();
+ for(let r of avail){let key=settings.calcMode==='dailyFirst'?r.date:String(r.month);let gg=settings.calcMode==='dailyFirst'?daily:monthly;let k=key+'|'+r.region;let cell=gg.get(k)||[];cell.push(r[settings.variable]);gg.set(k,cell);}
+ function groupByPeriod(reg){let coll=settings.calcMode==='dailyFirst'?daily:monthly,mo=new Map();for(let [k,vals] of coll){let sep=k.lastIndexOf('|');let dateStr=k.slice(0,sep),region=k.slice(sep+1);if(region!==reg)continue;let a=mo.get(dateStr)||[];a.push(mean(vals));mo.set(dateStr,a);}if(settings.calcMode==='monthlyMean'&&mo.size<settings.months.length)return NaN;return mean([...mo.values()].map(mean));}
+ let regVals={};for(let reg of ['서해','남해','동해'])regVals[reg]=groupByPeriod(reg);
+ if(settings.seaWeight==='sites'&&settings.calcMode==='dailyFirst'){
+ // For all-station weighted view: means of daily all-station mean, each day weighted equally.
+ let all=new Map();for(let r of avail){let k=r.date,arr=all.get(k)||[];arr.push(r[settings.variable]);all.set(k,arr);}return {value:mean([...all.values()].map(mean)),n:stationRows.length};}
+ if(settings.seaWeight==='sites'&&settings.calcMode==='monthlyMean'){
+ let all=new Map();for(let r of avail){let k=r.month,arr=all.get(k)||[];arr.push(r[settings.variable]);all.set(k,arr);}return {value:mean([...all.values()].map(mean)),n:stationRows.length};}
+ return {value:mean([...regionSet].map(r=>regVals[r]).filter(Number.isFinite)),n:stationRows.length};}
+ return {value:weighted,n:stationRows.length};}
+function buildSeries(records,settings){let stByYear=aggregate(records,settings),yrs=[...stByYear.keys()].sort((a,b)=>a-b),series={};const regs=['서해','남해','동해'];
+ for(let yr of yrs){let rows=stByYear.get(yr);let groupMap={};for(let reg of regs){let a=rows.filter(r=>r.region===reg);groupMap[reg]=a.length?aggregateSea(a,settings,records,yr):null;}
+ let pooled=rows;
+ if(settings.seaWeight==='equal'){let req=settings.activeRegions||regs;let values=req.map(r=>groupMap[r]?.value).filter(Number.isFinite);groupMap['전해역']={value:req.length&&values.length===req.length?mean(values):NaN,n:pooled.length};}
+ else groupMap['전해역']=aggregateSea(pooled,settings,records,yr);
+ for(let reg of ['전해역',...regs]){if(!series[reg])series[reg]=[];if(Number.isFinite(groupMap[reg]?.value))series[reg].push({year:yr,value:groupMap[reg].value,n:groupMap[reg].n});}
+ for(let s of rows){let key='지점:'+s.station+' ['+s.stationKey+']'; if(!series[key])series[key]=[];series[key].push({year:yr,value:s.value,n:1,validDays:s.validDays});}
+ }
+ return {series,stByYear};}
+function summary(series,year,settings){
+ let target=series.find(x=>x.year===year),prev=series.find(x=>x.year===year-1);
+ let base=series.filter(x=>x.year>=settings.refStart&&x.year<=settings.refEnd);
+ let ranked=base.map(x=>({...x,rankValue:round1(x.value)})).sort((a,b)=>b.rankValue-a.rankValue||a.year-b.year);
+ let inRange=year>=settings.refStart&&year<=settings.refEnd;
+ let rank=inRange&&target?1+ranked.filter(x=>x.rankValue>round1(target.value)+1e-9).length:null;
+ return {target,prev,baseline:mean(base.map(x=>x.value)),rank,nbase:ranked.length,highest:ranked[0]||null,lowest:ranked[ranked.length-1]||null,points:series,inRange};
+}
+function getSettings(){
+ const period=$('period').value, custom=$('customMonths').value;
+ let months=[...(period==='custom'?custom:period).split(',').map(x=>parseInt(x,10)).filter(x=>x>=1&&x<=12)].filter((x,i,a)=>a.indexOf(x)===i).sort((a,b)=>a-b);
+ if(!months.length)throw new Error('분석 월을 하나 이상 선택해야 합니다');
+ let year=Number($('year').value),baseline=$('baseline').value;
+ if(!Number.isInteger(year)||year<1900||year>2100)throw new Error('대상 연도를 올바르게 입력해 주세요.');
+ let refStart=0,refEnd=year;
+ if(baseline==='10')refStart=year-9;
+ else if(baseline==='5')refStart=year-4;
+ else if(baseline==='all')refStart=1900;
+ else if(baseline==='custom'){
+   refStart=Number($('baselineStart').value);refEnd=Number($('baselineEnd').value);
+   if(!Number.isInteger(refStart)||!Number.isInteger(refEnd)||refStart<1900||refEnd>2100||refStart>refEnd)throw new Error('비교 기간의 시작·종료 연도를 확인해 주세요.');
+ }
+ return {source:$('source').value,variable:$('variable').value,year,months,baseline,refStart,refEnd,region:$('region').value,calcMode:'monthlyMean',seaWeight:'equal',rankMode:'rounded',requireMonths:false};
+}
+const fmt=(x,d=1)=>Number.isFinite(x)?x.toFixed(d):'—';const signed=x=>Number.isFinite(x)?(x>0?'+':'')+fmt(x):'—';const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function makeTable(headers,rows){return '<div class="tablewrap"><table><thead><tr>'+headers.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(row=>'<tr>'+row.map((v,i)=>'<td class="num">'+(i===0?'<b>'+esc(v)+'</b>':v)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';}
+function drawChart(series,settings,reg){const vals=series||[]; if(vals.length<1)return '<div class="empty">연도별 관측 결과가 없습니다.</div>';const w=880,h=250,x0=62,x1=830,y0=30,y1=205;let min=Math.min(...vals.map(d=>d.value)),max=Math.max(...vals.map(d=>d.value)),gap=Math.max(max-min,.3);min-=gap*.22;max+=gap*.22;let ymin=Math.min(...vals.map(x=>x.year)),ymax=Math.max(...vals.map(x=>x.year));let xs=y=>ymin===ymax?(x0+x1)/2:x0+(y-ymin)/(ymax-ymin)*(x1-x0),ys=v=>y1-(v-min)/(max-min)*(y1-y0);let ticks=[0,.25,.5,.75,1].map(f=>min+(max-min)*f);let grid=ticks.map(v=>`<line x1="${x0}" y1="${ys(v)}" x2="${x1}" y2="${ys(v)}" stroke="#dfe6e3"/><text x="${x0-10}" y="${ys(v)+4}" text-anchor="end" font-size="11" fill="#67767c">${fmt(v)}</text>`).join('');let pts=vals.map(d=>`${xs(d.year).toFixed(2)},${ys(d.value).toFixed(2)}`).join(' ');let dots=vals.map(d=>`<circle cx="${xs(d.year)}" cy="${ys(d.value)}" r="4" fill="${d.year===settings.year?'#c57836':'#0a716b'}"/><text x="${xs(d.year)}" y="${ys(d.value)-10}" text-anchor="middle" font-size="11" fill="#19323b">${fmt(d.value)}</text><text x="${xs(d.year)}" y="${y1+18}" text-anchor="middle" font-size="11" fill="#627079">${d.year}</text>`).join('');return `<svg class="chart" id="figure" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc(reg)} 연도별 시계열"><rect width="${w}" height="${h}" fill="white"/>${grid}<polyline points="${pts}" fill="none" stroke="#0a716b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>${dots}</svg>`;}
+// Determine the last *valid* calendar day for the chosen stations, variable,
+// year and each month. Treat each selected month independently.
+// Do not use the computer clock: the loaded CSV can lag several days.
+function targetMonthCutoffs(rows,settings,chosen){
+ const last=new Map();
+ for(const r of rows){
+   if(r.source!==settings.source||r.year!==settings.year||!chosen.has(r.stationKey)||
+      !settings.months.includes(r.month)||!Number.isFinite(r[settings.variable]))continue;
+   const day=Number(r.date.slice(8,10));
+   if(day>(last.get(r.month)||0))last.set(r.month,day);
+ }
+ return last;
+}
+function describeCoverage(settings,cutoffs){
+ const cells=settings.months.map(m=>{
+   const end=cutoffs.get(m),lastDay=new Date(settings.year,m,0).getDate();
+   if(!end)return `${m}월: 자료 없음`;
+   return end<lastDay?`${m}월 1~${end}일 (부분 기간)`:`${m}월 전체 (1~${lastDay}일)`;
+ });
+ return `공통 비교 날짜: ${cells.join(' · ')}. ${settings.year}년과 모든 비교 연도에 동일 적용 (각 해의 결측은 그대로 제외).`;
+}
+function refresh(){
+ if(!STORE.records.length){$('status').textContent='먼저 자료를 자동으로 불러와야 합니다. 연결 문제가 있다면 수동 CSV 업로드를 사용하세요.';return;}
+ const settings=getSettings(),{rows,unknown,used}=normalizedRows();
+ const catalog=STORE.stationCatalog[settings.source]||[],chosen=selectedStations(settings.source);
+ if(chosen.size===0){clearResults('선택한 지점이 없습니다. 지점 선택에서 하나 이상 체크해 주세요.');return;}
+ settings.activeRegions=[...new Set(catalog.filter(s=>chosen.has(s.id)).map(s=>s.region))].filter(s=>['서해','남해','동해'].includes(s));
+ const customSelection=chosen.size<catalog.length;
+ // v0.8: As-of matching for every selected month. Calculate cutoffs from
+ // VALID values of the selected target-year stations, not from system date.
+ const cutoffs=targetMonthCutoffs(rows,settings,chosen);
+ settings.commonCoverage=settings.months.map(m=>`${m}월 1~${cutoffs.get(m)||'자료없음'}일`).join(' · ');
+ $('coverageInfo').textContent=describeCoverage(settings,cutoffs);
+ const missingRequested=settings.months.filter(m=>!cutoffs.has(m));
+ if(missingRequested.length){
+   clearResults(`${settings.year}년 ${missingRequested.join(', ')}월에 선택 지점의 유효 관측자료가 없습니다. 월/계절 분석을 위해 선택한 모든 월의 자료가 필요합니다.`);
+   $('coverageInfo').textContent=describeCoverage(settings,cutoffs);return;
+ }
+ // Remove records after the TARGET YEAR's last available calendar day,
+ // from ALL YEARS before constructing averages, previous-year difference,
+ // baselines, ranks and plots. No interpolation or synthetic observations.
+ const commonPeriodRows=rows.filter(r=>settings.months.includes(r.month)&&
+     Number(r.date.slice(8,10))<=cutoffs.get(r.month));
+ // Compare matched station-month pairs only: both target and previous years
+ // must have at least one valid value inside the same cutoff window.
+ const observedTarget=new Set(commonPeriodRows.filter(r=>r.source==='coastal'&&r.year===settings.year&&
+     Number.isFinite(r[settings.variable])&&chosen.has(r.stationKey)).map(r=>r.stationKey));
+ let valid=commonPeriodRows.filter(r=>r.source===settings.source&&chosen.has(r.stationKey)&&Number.isFinite(r[settings.variable])&&
+    (settings.source==='marine'||([settings.year-1,settings.year].includes(r.year)&&observedTarget.has(r.stationKey))));
+ const rawCoastalCount=observedTarget.size;
+ if(settings.source==='coastal'){
+   const pairs=new Map();
+   for(const r of valid){if(!settings.months.includes(r.month))continue;let k=r.stationKey+'|'+r.month;let s=pairs.get(k)||new Set();s.add(r.year);pairs.set(k,s);}
+   valid=valid.filter(r=>settings.months.includes(r.month)&&pairs.get(r.stationKey+'|'+r.month)?.size===2);
+ }
+ let now=valid.filter(r=>r.year===settings.year&&settings.months.includes(r.month));
+ let loadedUnique=new Set(valid.map(x=>x.stationKey));
+ let regionReady=true; // exploratory sea values only, NEVER label as official 73-station statistics.
+ let isPartialCoastal=settings.source==='coastal';
+ let fromCoastal=new Set(valid.filter(x=>COASTAL_CANDIDATES[x.stationKey]).map(x=>x.stationKey)).size;
+ let fromWave=loadedUnique.size-fromCoastal;
+ let caution=isPartialCoastal?`참고 통계 · 선택 ${chosen.size}/${catalog.length}개 · ${settings.year}년 유효 ${rawCoastalCount}개 · 공통 지점/월 ${loadedUnique.size}개 · 공식 73개 미확정`:
+   (customSelection?`선택 지점 ${chosen.size}/${catalog.length}개 · 공식 17개 전체 평균과 다를 수 있음`:(unknown.length?`분석 대상 밖 ${unknown.length}개 지점 제외`:'해양기상부이 17개 공식 산출방식 적용'));
+ const yearMonthObserved=new Set(now.map(r=>r.month));const missingMonths=settings.months.filter(m=>!yearMonthObserved.has(m));if(missingMonths.length)caution+=` · 대상 연도 ${missingMonths.join(',')}월 자료 없음`;
+ const partialMonths=settings.months.filter(m=>cutoffs.get(m)<new Date(settings.year,m,0).getDate());
+ if(partialMonths.length)caution+=` · 부분 월 동일기간 적용: ${partialMonths.map(m=>m+'월 1~'+cutoffs.get(m)+'일').join(', ')}`;
+ $('validity').textContent=caution;$('validity').style.background=isPartialCoastal?'#f8eee4':'#ecf3f0';
+ const {series}=buildSeries(valid,settings),allSeries={};
+ for(const [name,arr] of Object.entries(series))allSeries[name]=summary(arr,settings.year,settings);
+ let keys=settings.region==='all'?['전해역','서해','남해','동해']:
+    settings.region==='stations'?Object.keys(series).filter(x=>x.startsWith('지점:')).sort((a,b)=>a.localeCompare(b,'ko')):[settings.region];
+
+ const expected= settings.baseline==='all'?0:settings.refEnd-settings.refStart+1;
+ let yrows=keys.map(name=>{
+    const s=allSeries[name]||{},t=s.target?.value??NaN,p=s.prev?.value??NaN,base=s.baseline;
+    let rankOk= s.inRange&&s.rank!=null&&(expected===0||s.nbase===expected);
+    return {name:name.replace(/^지점:/,''),seriesKey:name,t,p,base,
+      delta:Number.isFinite(t)&&Number.isFinite(p)?t-p:NaN,
+      anomaly:Number.isFinite(t)&&Number.isFinite(base)?t-base:NaN,
+      rank:rankOk?s.rank:null,rankFlag:s.inRange?((expected!==0&&s.nbase<expected)?'자료 부족':''):'대상 연도 제외',
+      nbase:s.nbase||0,n:s.target?.n||0,days:s.target?.validDays??0,high:s.highest,low:s.lowest};
+ });
+ let keyAll=regionReady?(allSeries['전해역']||{}):{};
+ let tAll=keyAll.target?.value??NaN,pAll=keyAll.prev?.value??NaN;
+ $('viewTitle').textContent=`${settings.year}년 ${settings.months.map(m=>m+'월').join('·')} / ${settings.source==='marine'?'해양기상부이':'연안·파고부이'}`;
+ $('subtitle').textContent=settings.source==='marine'?`${settings.variable==='sst'?'해수면 온도':'평균 유의파고'} · 선택 ${chosen.size}/${catalog.length}개 지점 · 포함된 ${settings.activeRegions.length}개 해역 동일가중 · 비교 ${settings.refStart}~${settings.refEnd}년`:`${settings.variable==='sst'?'해수면 온도':'평균 유의파고'} · 선택 ${chosen.size}/${catalog.length}개 지점 · ${settings.year-1}년 대비 ${settings.year}년 · 잠정 해역분류 · 10년 순위 미적용`;
+ $('kval').textContent=fmt(tAll);$('kunits').textContent=settings.variable==='sst'?'℃':'m';
+ $('kprev').textContent=Number.isFinite(tAll)&&Number.isFinite(pAll)?signed(tAll-pAll):'—';
+ $('krank').textContent=settings.source==='coastal'?'미적용':!keyAll.inRange?'대상 연도 제외':(expected>0&&keyAll.nbase<expected)?'자료 부족':keyAll.rank?keyAll.rank+'위':'—';
+ $('krange').textContent=settings.source==='marine'?`비교 ${settings.refStart}~${settings.refEnd} · 유효 ${keyAll.nbase||0}개년`:'연안·파고부이: 동일 지점·월 전년 비교';
+ $('ksites').textContent=new Set(now.map(x=>x.stationKey)).size;
+ $('kmeta').textContent=`지점 선택 ${chosen.size}/${catalog.length}개 · 실제 해당 연도/월 유효값 보유 지점`;
+ $('tableSlot').innerHTML=yrows.length?(settings.source==='coastal'?
+   makeTable(['해역 / 지점',settings.year+'년',(settings.year-1)+'년','전년 차이','공통 유효 지점',settings.year+'년 유효일수'],yrows.map(r=>[r.name,fmt(r.t),fmt(r.p),signed(r.delta),String(r.n),r.seriesKey.startsWith('지점:')?String(r.days):'—'])):
+   makeTable(['해역 / 지점',settings.year+'년',(settings.year-1)+'년','전년차','비교기간 평균','평균 대비','순위','최고연도','최저연도','유효지점'],yrows.map(r=>[r.name,fmt(r.t),fmt(r.p),signed(r.delta),fmt(r.base),signed(r.anomaly),r.rank?`${r.rank}위 / ${r.nbase}년`:(r.rankFlag||'—'),r.high?`${r.high.year} (${fmt(r.high.value)})`:'—',r.low?`${r.low.year} (${fmt(r.low.value)})`:'—',String(r.n)]))):'<div class="empty">해당 조건에 대해 유효자료가 없습니다.</div>';
+ let plotKey=settings.region==='stations'?yrows.find(x=>Number.isFinite(x.t))?.seriesKey:(settings.region==='all'?'전해역':settings.region);
+
+ $('chartLabel').textContent=plotKey?plotKey.replace(/^지점:/,''):'—';
+ $('chartSlot').innerHTML=plotKey?drawChart(series[plotKey],settings,plotKey):'<div class="empty">분석 대상과 지점 구성을 확인하세요.</div>';
+ let countByYear=new Set(valid.filter(r=>r.year===settings.year).map(r=>r.stationKey)).size;
+ $('stationInfo').innerHTML=settings.source==='coastal'?`연안·파고부이 지점정보(2026.10 메타데이터) 자동 인식 · 전환/신규 후보 13개(신창 포함)<br>선택 <b>${chosen.size}/${catalog.length}개</b> · ${settings.year}년 선택 지점 중 유효값 보유 <b>${rawCoastalCount}개</b> · ${settings.year-1}/${settings.year}년 같은 월에 공통 유효값이 있는 지점 <b>${loadedUnique.size}개</b> (연안 후보 ${fromCoastal}, 파고 ${fromWave})<br>원자료 중복일자료 ${STORE.duplicated||0}건 정리 · 미분류/제외 지점 ${unknown.length}개<br><b>주의: 해역 분류 일부는 잠정이며, 보도자료 공식 73개 모집단의 검증 완료 수치가 아닙니다.</b>`:`해양기상부이 공식 17개 지점 중 <b>${chosen.size}개 선택</b> · 대상 연도/월 실제 유효자료가 있는 지점 <b>${new Set(now.map(r=>r.stationKey)).size}개</b><br>원자료 중복일자료 ${STORE.duplicated||0}건 정리 · 분석대상 밖 자료 ${unknown.length}개 지점 제외<br><b>${customSelection?'선택 지점에 공식 계산방식을 적용했습니다. 공식 17개 전체 통계와는 달라질 수 있습니다.':'공식 17개 지점에 대해 보도자료 검증 계산식을 적용했습니다.'}</b>`;
+ $('downloadCSV').disabled=!yrows.length;
+ $('downloadSVG').disabled=!document.getElementById('figure');
+ $('downloadStations').disabled=!STORE.records.length;
+ STORE.result=yrows.length?{rows:yrows,settings,chart:document.getElementById('figure')?.outerHTML}:null;
+}
+function dCsv(cols,rows){let content=cols.join(',')+'\r\n'+rows.map(row=>row.map(v=>{let s=String(v??'');return /[",\r\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}).join(',')).join('\r\n');return '\uFEFF'+content;}
+function dl(filename,content,mime){let a=document.createElement('a'),u=URL.createObjectURL(new Blob([content],{type:mime}));a.href=u;a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(u);a.remove();},100);}
+$('loadBtn').onclick=async()=>{try{$('status').textContent='파일 검사 중...';let maps=new Map();if($('stationFile').files[0])maps=parseMetadata(await readText($('stationFile').files[0],$('charset').value));STORE.metadata=maps;STORE.records=[];STORE.normalized=null;STORE.files=[];STORE.badFiles=[];STORE.samples=[];const jobs=[...Array.from($('marineFiles').files).map(file=>({file,src:'marine'})),...Array.from($('coastalFiles').files).map(file=>({file,src:'coastal'}))];if(!jobs.length)throw new Error('일자료 CSV 파일을 선택하세요');for(let job of jobs){try{let t=await readText(job.file,$('charset').value),out=asRows(job.src,t);for(const item of out.data)STORE.records.push(item);STORE.files.push({name:job.file.name,type:job.src,n:out.data.length});STORE.samples.push({file:job.file.name,head:out.head});}catch(e){STORE.badFiles.push({file:job.file.name,error:e.message});}}
+ let sum=STORE.files.reduce((a,x)=>a+x.n,0);$('fileTags').innerHTML=`<span class="tag">${STORE.files.length}개 파일</span><span class="tag">${sum.toLocaleString('ko-KR')}건 원자료</span><span class="tag">해양기상부이 17개 내장</span><span class="tag">메타데이터 지점명 내장</span>`;
+ $('status').textContent=`파일 ${STORE.files.length}개 로드, 일자료 ${sum.toLocaleString('ko-KR')}건\n`+STORE.files.map(x=>`${x.name}: ${x.n.toLocaleString()}건`).join('\n')+(STORE.badFiles.length?'\n실패:\n'+STORE.badFiles.map(x=>x.file+': '+x.error).join('\n'):'');if(!STORE.records.length)throw new Error('읽을 수 있는 원자료가 없습니다');STORE.normalized=stationData(); STORE.duplicated=STORE.normalized.duplicated;makeStationCatalog();renderStationPicker();refresh();}catch(e){$('status').textContent='오류: '+e.message+(STORE.badFiles.length?'\n'+STORE.badFiles.map(x=>x.file+': '+x.error).join('\n'):'');$('status').classList.add('error');}};
+$('stationSearch').oninput=()=>renderStationPicker();
+$('selectAll').onclick=()=>{const src=$('source').value;setSelection(src,STORE.stationCatalog[src].map(s=>s.id));};
+$('selectNone').onclick=()=>setSelection($('source').value,[]);
+$('selectInvert').onclick=()=>{const src=$('source').value,current=selectedStations(src);setSelection(src,STORE.stationCatalog[src].filter(s=>!current.has(s.id)).map(s=>s.id));};
+$('downloadSelection').onclick=()=>{const src=$('source').value,catalog=STORE.stationCatalog[src],selected=selectedStations(src);if(!catalog.length)return;
+ dl(`selected_stations_${src}.csv`,dCsv(['source','station_id','station_name','region','selected'],catalog.map(s=>[src,s.id,s.name,s.region,selected.has(s.id)?1:0])),'text/csv;charset=utf-8');
+};
+$('stationSelectionFile').onchange=async()=>{
+ const file=$('stationSelectionFile').files[0];if(!file)return;
+ try{
+  const src=$('source').value,items=csvParse(await readText(file,'auto'));if(items.length<2)throw new Error('선택 명단 CSV에 내용이 없습니다.');
+  const heads=items[0],idcol=headerIndex(heads,['station_id','지점코드','지점번호']),flagcol=headerIndex(heads,['selected','선택']),sourcecol=headerIndex(heads,['source','관측망']);
+  if(idcol<0||flagcol<0)throw new Error('station_id, selected 열이 있는 선택 명단 CSV가 필요합니다.');
+  const csvSources=new Set(items.slice(1).filter(r=>r[idcol]).map(r=>sourcecol<0?src:String(r[sourcecol]).trim()));
+  if(csvSources.size!==1||!csvSources.has(src))throw new Error('선택 명단의 관측망이 현재 화면과 다릅니다. 먼저 관측망을 바꿔주세요.');
+  const available=new Set(STORE.stationCatalog[src].map(r=>r.id));
+  const selected=items.slice(1).filter(r=>['1','true','y','yes','선택'].includes(String(r[flagcol]||'').trim().toLowerCase())&&available.has(String(r[idcol]).trim())).map(r=>String(r[idcol]).trim());
+  setSelection(src,selected);$('status').textContent=`선택 명단 ${file.name} 불러오기 완료: ${selected.length}개 지점 선택`;
+ }catch(e){$('status').textContent='선택 명단 오류: '+e.message;}
+ finally{$('stationSelectionFile').value='';}
+};
+$('analyseBtn').onclick=()=>{try{refresh()}catch(e){$('status').textContent='통계 계산 오류: '+e.message;}};
+$('source').onchange=()=>{renderStationPicker();if($('source').value==='coastal'){$('region').value='all';$('variable').value='sst';$('baseline').disabled=true;$('customYearsWrap').hidden=true;}else{$('region').value='all';$('baseline').disabled=false;$('customYearsWrap').hidden=$('baseline').value!=='custom';}if(STORE.records.length)try{refresh()}catch(e){$('status').textContent=e.message;}};
+$('period').onchange=()=>$('customWrap').hidden=$('period').value!=='custom';
+$('baseline').onchange=()=>$('customYearsWrap').hidden=$('baseline').value!=='custom';
+$('downloadCSV').onclick=()=>{let r=STORE.result;if(!r)return;if(r.settings.source==='coastal'){dl(`coastal_station_${r.settings.year}_${r.settings.months.join('-')}.csv`,dCsv(['지점','대상연도','평균','전년평균','전년차','유효일수','공통비교 날짜 범위'],r.rows.map(x=>[x.name,r.settings.year,Number.isFinite(x.t)?x.t.toFixed(5):'',Number.isFinite(x.p)?x.p.toFixed(5):'',Number.isFinite(x.delta)?x.delta.toFixed(5):'',x.days,r.settings.commonCoverage])),'text/csv;charset=utf-8');return;}let cols=['해역/지점','년도','평균','전년평균','전년차','기준기간 평균','기준기간 편차','순위','비교연도수','최고연도','최저연도','유효지점','비교 시작연도','비교 종료연도','공통비교 날짜 범위'];let rows=r.rows.map(x=>[x.name,r.settings.year,Number.isFinite(x.t)?x.t.toFixed(5):'',Number.isFinite(x.p)?x.p.toFixed(5):'',Number.isFinite(x.delta)?x.delta.toFixed(5):'',Number.isFinite(x.base)?x.base.toFixed(5):'',Number.isFinite(x.anomaly)?x.anomaly.toFixed(5):'',x.rank||'',x.nbase,x.high?.year||'',x.low?.year||'',x.n,r.settings.refStart,r.settings.refEnd,r.settings.commonCoverage]);dl(`marine_stats_${r.settings.year}_${r.settings.months.join('-')}.csv`,dCsv(cols,rows),'text/csv;charset=utf-8');};
+$('downloadSVG').onclick=()=>{let r=STORE.result;if(r?.chart)dl(`marine_trend_${r.settings.year}.svg`,r.chart,'image/svg+xml;charset=utf-8');};
+$('downloadStations').onclick=()=>{
+ const {rows}=normalizedRows();const data=new Map();
+ for(const r of rows){if(r.source!=='coastal'||![2025,2026].includes(r.year))continue;
+   const k=r.stationKey;let x=data.get(k)||{id:k,name:r.station,region:r.region,kind:COASTAL_CANDIDATES[k]?'연안 전환/신규':'파고',n25:0,n26:0};
+   if(Number.isFinite(r.sst)){if(r.year===2025)x.n25++;else x.n26++;}
+   data.set(k,x);
+ }
+ let arr=[...data.values()].sort((a,b)=>a.id.localeCompare(b.id));
+ dl('coastal_station_audit_2025_2026.csv',dCsv(['station_id','station_name','region','kind','sst_days_2025','sst_days_2026','2026자료'],arr.map(x=>[x.id,x.name,x.region,x.kind,x.n25,x.n26,x.n26?'있음':'없음'])),'text/csv;charset=utf-8');
+};
+
+// Stage 2-A: fetch SAME-ORIGIN data only, then hand files to the untouched v0.8 CSV import pipeline.
+// No credentials, token, remote APIs, or persistent data collection are used here.
+async function loadHostedFiles(){
+ const label=$('hostedDataNote'),details=$('remoteDataDetails'),btn=$('reloadHostedBtn');
+ const setMsg=(head,info,isBad=false)=>{
+   label.querySelector('b').textContent=head;details.textContent=info;
+   label.style.borderLeftColor=isBad?'#a34b36':'#096a68';
+ };
+ btn.disabled=true;
+ try{
+   if(location.protocol==='file:')throw new Error('file:// 방식으로는 자료 자동 로딩이 제한됩니다. GitHub Pages 또는 로컬 HTTP 서버로 열어주세요.');
+   setMsg('관측자료 목록을 확인하는 중','저장소의 data/manifest.json을 읽고 있습니다.');
+   const mfResponse=await fetch('./data/manifest.json',{cache:'no-cache'});
+   if(!mfResponse.ok)throw new Error('manifest.json 요청 실패 (HTTP '+mfResponse.status+')');
+   const mf=await mfResponse.json();
+   if(mf.format_version!==1||!Array.isArray(mf.datasets)||!mf.datasets.length)throw new Error('자료 목록 형식이 올바르지 않습니다.');
+   const files={marine:[],coastal:[]};
+   let count=0,downloadedRows=0;
+   // Download in small batches so progress remains responsive without opening dozens of requests at once.
+   for(let offset=0;offset<mf.datasets.length;offset+=4){
+     const batch=mf.datasets.slice(offset,offset+4);
+     const results=await Promise.all(batch.map(async item=>{
+       if(!['marine','coastal'].includes(item.source)||!/^data\/(marine|coastal)\/\d{4}\.csv$/.test(item.path))throw new Error('허용되지 않는 자료 경로');
+       const res=await fetch('./'+item.path,{cache:'no-cache'});
+       if(!res.ok)throw new Error(item.path+' 다운로드 오류 (HTTP '+res.status+')');
+       const body=await res.blob();
+       if(item.bytes&&body.size!==item.bytes)throw new Error(item.path+' 파일 크기 불일치 (불완전 다운로드 가능성)');
+       return {source:item.source,file:new File([body],item.source+'_'+item.year+'.csv',{type:'text/csv'}),rows:item.rows};
+     }));
+     for(const r of results){files[r.source].push(r.file);count++;downloadedRows+=r.rows;}
+     setMsg('관측자료 다운로드 중',count+' / '+mf.datasets.length+'개 파일 · '+downloadedRows.toLocaleString('ko-KR')+'건 목록 확인');
+     await new Promise(resolve=>setTimeout(resolve,0));
+   }
+   for(const [kind,inputId] of [['marine','marineFiles'],['coastal','coastalFiles']]){
+     const transfer=new DataTransfer();for(const file of files[kind])transfer.items.add(file);
+     $(inputId).files=transfer.files;
+   }
+   $('charset').value='auto';
+   setMsg('관측자료를 계산기에 등록하는 중',count+'개 파일 · '+downloadedRows.toLocaleString('ko-KR')+'건 분석 준비');
+   await $('loadBtn').onclick();
+   if(STORE.badFiles.length||STORE.files.length!==mf.datasets.length)throw new Error('일부 CSV가 파싱되지 않았습니다. '+STORE.badFiles.map(x=>x.file+' '+x.error).join(' / '));
+   const m=mf.summary?.marine?.last_observation||'—',c=mf.summary?.coastal?.last_observation||'—';
+   setMsg('관측자료 자동 로딩 완료',
+      '원본 스냅샷: '+(mf.snapshot_download_date||'미상')+' · 해양기상부이 관측 종료 '+m+' · 연안·파고부이 관측 종료 '+c+' · '+count+'개 파일 / '+STORE.records.length.toLocaleString('ko-KR')+'건. 자동 갱신은 다음 단계에서 연결합니다.');
+ }catch(err){
+   setMsg('자동 로딩 실패 — 수동 업로드 가능',err.message,true);
+   $('status').textContent='자동 자료 읽기 오류: '+err.message+'\n수동 업로드에서 기존 CSV 두 개를 선택하여 분석할 수 있습니다.';
+ }finally{btn.disabled=false;}
+}
+$('reloadHostedBtn').onclick=()=>loadHostedFiles();
+window.addEventListener('load',()=>loadHostedFiles());
+
+})();
+</script></body></html>
