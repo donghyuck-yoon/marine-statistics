@@ -1,0 +1,28 @@
+name: Verify KMA marine API (read-only)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate_api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout reference CSVs
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compare API sample with existing portal data
+        env:
+          KMA_API_KEY: ${{ secrets.KMA_API_KEY }}
+        run: python scripts/probe_kma_api.py
+      - name: Upload sanitized validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kma-api-sample-validation
+          path: api-probe-report.json
+          if-no-files-found: ignore
+          retention-days: 7
