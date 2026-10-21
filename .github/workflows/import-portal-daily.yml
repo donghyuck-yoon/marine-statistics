@@ -9,6 +9,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+  pages: write
 concurrency:
   group: official-portal-daily-csv-import
   cancel-in-progress: false
@@ -28,6 +29,7 @@ jobs:
       - name: Validate, merge, and consume portal CSVs
         run: python scripts/import_portal_daily.py --apply
       - name: Commit only validated official data
+        id: commit
         run: |
           git add -A data/ uploads/
           if git diff --cached --quiet; then
@@ -38,3 +40,9 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "Update official KMA daily data from portal CSV"
           git push origin HEAD:main
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+      - name: Rebuild GitHub Pages from the updated branch
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method POST "repos/$GITHUB_REPOSITORY/pages/builds"
