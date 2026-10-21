@@ -29,6 +29,19 @@ main{max-width:1280px;margin:24px auto;padding:0 20px;display:grid;grid-template
 .station-check .station-code{color:#81918e;font-size:10px;margin-left:auto}
 .picker-note{margin:8px 0 0;color:#667775;font-size:10.5px;line-height:1.55}
 .picker-empty{padding:12px;font-size:11px;color:var(--muted)}
+
+/* FIX: responsive intrinsic sizing (tables/charts must not expand the entire mobile page) */
+main > aside, main > div, main section, .panel, #tableSlot, #chartSlot {min-width:0;max-width:100%}
+.tablewrap{display:block;width:100%;max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.chart{max-width:100%;height:auto}
+@media(max-width:840px){
+  main{grid-template-columns:minmax(0,1fr)}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .kpi{min-width:0}
+  .kpi-val{overflow-wrap:anywhere}
+  .hero,.toolbar,.station-group-title{min-width:0}
+  .caption,.foot,#stationInfo,#status{overflow-wrap:anywhere}
+}
 </style>
 </head>
 <body>
