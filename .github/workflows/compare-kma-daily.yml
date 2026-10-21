@@ -1,0 +1,30 @@
+name: Compare KMA 30-minute observations against daily CSV
+on:
+  push:
+    paths:
+      - .github/workflows/compare-kma-daily.yml
+      - scripts/compare_kma_daily.py
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Derive daily SST from 30-minute observations (no writes)
+        env:
+          KMA_API_KEY: ${{ secrets.KMA_API_KEY }}
+        run: python scripts/compare_kma_daily.py
+      - name: Upload comparison report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kma-daily-sst-comparison
+          path: daily-sst-comparison.json
+          if-no-files-found: ignore
+          retention-days: 7
