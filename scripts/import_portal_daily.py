@@ -193,9 +193,10 @@ def merge(repo, upload_folder, apply):
             'first': min(key[1] for key in keys), 'last': max(key[1] for key in keys)
         }
     if apply:
-        manifest['datasets'].sort(key=lambda r: (r['source'], r['year']))
-        update_manifest(manifest, repo, stats, index, names)
-        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        if changed_files:
+            manifest['datasets'].sort(key=lambda r: (r['source'], r['year']))
+            update_manifest(manifest, repo, stats, index, names)
+            manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         for path in incoming:
             path.unlink()
     print(json.dumps({'uploaded_csvs': names, 'apply': apply, **counters}, ensure_ascii=False, indent=2))
