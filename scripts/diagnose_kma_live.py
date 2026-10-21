@@ -65,6 +65,9 @@ def get(name,path,params):
             if els:
                 one=els[0]
                 result["first_item_fields"]=[c.tag[:40] for c in list(one)[:20]]
+                for node in list(one)[:2]:
+                    result["nested_"+node.tag[:20]+"_fields"]=[c.tag[:40] for c in list(node)[:25]]
+                    result["nested_"+node.tag[:20]+"_children"]=len(list(node))
                 def safe_num(k):
                     t=one.findtext(k)
                     if t is not None and re.fullmatch(r"[-+]?[0-9]{1,16}([.\-:][0-9]{1,16})*",t.strip()):
@@ -105,9 +108,22 @@ def get(name,path,params):
         if data:
             first=data[0].split()
             result["field_count"]=len(first)
-            # Sampling ONLY timestamps and station IDs matching a strict numeric pattern.
-            numeric=[x[:15] for x in first[:3] if re.fullmatch(r"[0-9.\-]+",x)]
-            result["numeric_prefix_fields"]=numeric
+            # Numeric observations or limited character-class labels ONLY; never a raw body excerpt.
+            details=[]
+            for idx in (0,1,2,len(data)-1):
+                if idx < 0 or idx >= len(data): continue
+                tokens=data[idx].split()
+                brief=[]
+                for value in tokens[:6]:
+                    if re.fullmatch(r"[-+]?[0-9]{1,14}(?:[.][0-9]{1,8})?",value):
+                        brief.append(value)
+                    elif re.fullmatch(r"[A-Za-z_]{1,18}",value):
+                        brief.append("LABEL:"+value)
+                    else:
+                        brief.append("OTHER")
+                details.append({"row_number":idx,"token_count":len(tokens),"field_shape":brief})
+            result["row_shapes"]=details
+            result["first_data_column_count"]=len(data[1].split()) if len(data)>1 else None
         result["comment_lines"]=len(lines)-len(data)
     return result
 
