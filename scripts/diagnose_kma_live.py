@@ -68,6 +68,17 @@ def get(name,path,params):
                 for node in list(one)[:2]:
                     result["nested_"+node.tag[:20]+"_fields"]=[c.tag[:40] for c in list(node)[:25]]
                     result["nested_"+node.tag[:20]+"_children"]=len(list(node))
+                    if node.tag=="day":
+                        infos=node.findall("info")
+                        result["day_info_count"]=len(infos)
+                        if infos:
+                            result["first_info_fields"]=[c.tag[:40] for c in list(infos[0])[:24]]
+                            result["first_info_numeric"]={
+                                c.tag:(c.text or "").strip()[:35]
+                                for c in list(infos[0])
+                                if c.tag in ("tm","tw","wh_sig","wh_sig_","wp","day")
+                                and re.fullmatch(r"[-+0-9. :/]+",(c.text or "").strip())
+                            }
                 def safe_num(k):
                     t=one.findtext(k)
                     if t is not None and re.fullmatch(r"[-+]?[0-9]{1,16}([.\-:][0-9]{1,16})*",t.strip()):
@@ -106,6 +117,14 @@ def get(name,path,params):
         data=[ln for ln in lines if not ln.startswith(("#","//"))]
         result["observed_rows"]=len(data)
         if data:
+            # Only inside the private run artifact; mask credentials just in case a
+            # server error page accidentally contains a request URL.
+            def scrub(value):
+                if KEY: value=value.replace(KEY,"[REDACTED]")
+                value=re.sub(r"(?i)(authkey\s*[=:]\s*)[^\s&\"']+",r"\1[REDACTED]",value)
+                return value[:180]
+            result["text_first_line"]=scrub(data[0])
+            result["text_second_line"]=scrub(data[1]) if len(data)>1 else None
             first=data[0].split()
             result["field_count"]=len(first)
             # Numeric observations or limited character-class labels ONLY; never a raw body excerpt.
