@@ -42,6 +42,24 @@ main > aside, main > div, main section, .panel, #tableSlot, #chartSlot {min-widt
   .hero,.toolbar,.station-group-title{min-width:0}
   .caption,.foot,#stationInfo,#status{overflow-wrap:anywhere}
 }
+
+/* FIX: station picker layout and checkbox sizing
+   The general input:not([type=file]) rule sets width:100% even on checkboxes.
+   Give checkboxes an explicit intrinsic size and keep station labels in a grid. */
+.picker{width:100%;min-width:0;max-width:100%;}
+.picker-title{min-width:0;flex-wrap:wrap;gap:5px 8px;}
+.picker-title .picker-count{flex:0 0 auto;white-space:nowrap;}
+.picker-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:8px 0 10px;}
+.picker-actions button{width:100%;min-width:0;min-height:32px;margin:0;padding:6px 5px;text-align:center;white-space:nowrap;}
+.station-scroller{width:100%;max-width:100%;min-width:0;overflow-x:hidden;overflow-y:auto;}
+.station-group-title{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px;min-width:0;}
+.station-group-title > span:first-child{min-width:0;overflow-wrap:anywhere;}
+.station-group-title .group-actions{display:flex;gap:4px;flex:0 0 auto;align-items:center;}
+.station-group-title .group-toggle{margin:0;padding:5px 7px;white-space:nowrap;}
+.station-check{display:grid;grid-template-columns:18px minmax(0,1fr) auto;align-items:center;column-gap:8px;min-width:0;width:100%;min-height:38px;}
+.station-check input[type="checkbox"]{box-sizing:border-box;appearance:auto;width:16px;height:16px;min-width:16px;min-height:16px;padding:0;margin:0;border:0;accent-color:var(--accent);justify-self:center;}
+.station-check > span:not(.station-code){min-width:0;overflow-wrap:anywhere;word-break:keep-all;}
+.station-check .station-code{margin-left:0;flex:0 0 auto;white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right;}
 </style>
 </head>
 <body>
