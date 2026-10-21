@@ -10,6 +10,7 @@ import re
 import sys
 import urllib.parse
 import urllib.request
+import urllib.error
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -72,8 +73,23 @@ def query(endpoint: str, station: str, year: int, month: int, key: str):
         with urllib.request.urlopen(request, timeout=35) as response:
             raw = response.read(500_000)
             status = response.status
+    except urllib.error.HTTPError as exc:
+        # Only expose the numeric HTTP status. Error objects, headers, and bodies
+        # can contain request URLs with the secret token, so never log them.
+        status = int(exc.code)
+        category = (
+            "authentication_or_credential" if status == 401 else
+            "access_denied_or_api_approval" if status == 403 else
+            "endpoint_not_found" if status == 404 else
+            "rate_limited" if status == 429 else
+            "upstream_server_error" if 500 <= status <= 599 else
+            "other_http_error"
+        )
+        return [], {"http_status": status, "error": category}
+    except urllib.error.URLError as exc:
+        # Do not print the URL or exception message: may contain secret.
+        return [], {"http_status": None, "error": "connection_or_dns_error"}
     except Exception as exc:
-        # Never print exception text: urllib errors may contain the query-string API key.
         return [], {"http_status": None, "error": "request_failed_" + type(exc).__name__}
     rows, fmt, error = parse_response(raw)
     return rows, {"http_status": status, "response_format": fmt, "error": error}
