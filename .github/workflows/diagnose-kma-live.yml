@@ -1,0 +1,30 @@
+name: Diagnose KMA live observations (read-only)
+on:
+  push:
+    paths:
+      - .github/workflows/diagnose-kma-live.yml
+      - scripts/diagnose_kma_live.py
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Check approved ocean APIs without changing published observations
+        env:
+          KMA_API_KEY: ${{ secrets.KMA_API_KEY }}
+        run: python scripts/diagnose_kma_live.py
+      - name: Upload key-free capability report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kma-live-diagnostics
+          path: api-live-diagnostics.json
+          if-no-files-found: ignore
+          retention-days: 7
