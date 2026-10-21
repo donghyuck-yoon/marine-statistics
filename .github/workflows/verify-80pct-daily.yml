@@ -1,0 +1,32 @@
+name: Validate 80pct API daily means vs official CSV
+on:
+  push:
+    paths:
+      - '.github/workflows/verify-80pct-daily.yml'
+      - 'scripts/verify_80pct_portal.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - name: Check out official KMA daily CSV reference
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Reconstruct API day means and compare at 80pct coverage
+        env:
+          KMA_API_KEY: ${{ secrets.KMA_API_KEY }}
+        run: python scripts/verify_80pct_portal.py
+      - name: Upload diagnostic report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-80pct-official-daily-comparison
+          path: api-80pct-vs-portal.json
+          if-no-files-found: ignore
+          retention-days: 14
