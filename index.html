@@ -70,6 +70,7 @@ main > aside, main > div, main section, .panel, #tableSlot, #chartSlot {min-widt
   <b>저장된 관측자료 자동 불러오기 준비 중</b><div id="remoteDataDetails" style="margin-top:5px">GitHub Pages에 저장한 일자료를 읽습니다. API를 직접 호출하지 않습니다.</div>
 </div>
 <button id="reloadHostedBtn" class="secondary wide" style="margin-bottom:12px" type="button">저장된 관측자료 다시 불러오기</button>
+<a href="https://github.com/donghyuck-yoon/marine-statistics/upload/main/uploads" target="_blank" rel="noopener" class="secondary wide" style="display:block;text-align:center;text-decoration:none;padding:10px;margin:0 0 12px;font-size:12px;font-weight:700">공식 일자료 CSV 업로드 · 갱신 ↗</a>
 <details style="margin-bottom:12px"><summary class="mini" style="cursor:pointer;font-weight:700">수동 CSV 업로드 (자동 로딩 오류 시 사용)</summary><div style="padding-top:12px">
 <div class="input-row"><label class="small" for="marineFiles">해양기상부이 일자료 CSV (다중 선택 가능)</label><input id="marineFiles" type="file" multiple accept=".csv,.txt"></div>
 <div class="input-row"><label class="small" for="coastalFiles">연안·파고부이 일자료 CSV (다중 선택 가능)</label><input id="coastalFiles" type="file" multiple accept=".csv,.txt"></div>
@@ -501,7 +502,7 @@ async function loadHostedFiles(){
    if(STORE.badFiles.length||STORE.files.length!==mf.datasets.length)throw new Error('일부 CSV가 파싱되지 않았습니다. '+STORE.badFiles.map(x=>x.file+' '+x.error).join(' / '));
    const m=mf.summary?.marine?.last_observation||'—',c=mf.summary?.coastal?.last_observation||'—';
    setMsg('관측자료 자동 로딩 완료',
-      '원본 스냅샷: '+(mf.snapshot_download_date||'미상')+' · 해양기상부이 관측 종료 '+m+' · 연안·파고부이 관측 종료 '+c+' · '+count+'개 파일 / '+STORE.records.length.toLocaleString('ko-KR')+'건. 자동 갱신은 다음 단계에서 연결합니다.');
+      '최초 자료 다운로드: '+(mf.snapshot_download_date||'미상')+' · 최근 공식 CSV 반영: '+(mf.last_portal_import_at_kst?mf.last_portal_import_at_kst.replace('T',' ').slice(0,16):'아직 없음')+' · 해양기상부이 관측 종료 '+m+' · 연안·파고부이 관측 종료 '+c+' · '+count+'개 파일 / '+STORE.records.length.toLocaleString('ko-KR')+'건. 새 공식 CSV를 업로드하면 GitHub Actions가 자동으로 검증하고 반영합니다.');
  }catch(err){
    setMsg('자동 로딩 실패 — 수동 업로드 가능',err.message,true);
    $('status').textContent='자동 자료 읽기 오류: '+err.message+'\n수동 업로드에서 기존 CSV 두 개를 선택하여 분석할 수 있습니다.';
