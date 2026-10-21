@@ -1,0 +1,29 @@
+name: Validate reconstructed wave buoy daily averages (read-only)
+on:
+  push:
+    paths:
+      - .github/workflows/validate-wave-daily.yml
+      - scripts/validate_wave_daily.py
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Sample one full day of historic wave buoy data
+        env:
+          KMA_API_KEY: ${{ secrets.KMA_API_KEY }}
+        run: python scripts/validate_wave_daily.py
+      - name: Upload read-only comparison report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kma-wave-daily-comparison
+          path: wave-daily-reconstruction.json
+          if-no-files-found: ignore
