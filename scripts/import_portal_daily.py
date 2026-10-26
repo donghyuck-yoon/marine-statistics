@@ -51,8 +51,9 @@ def read_csv(path, expected_cols, upload=False):
     if not hdr:
         raise ValueError(f'{path.name}: missing CSV header')
     hdr = [s.strip().lstrip('\ufeff') for s in hdr]
-    if tuple(hdr) != expected_cols:
-        raise ValueError(f'{path.name}: unexpected columns; use original KMA daily CSV with full columns')
+    partial_coastal = upload and expected_cols == C and tuple(hdr) in (C[:3], C[:5])
+    if tuple(hdr) != expected_cols and not partial_coastal:
+        raise ValueError(f'{path.name}: unexpected columns; use original KMA daily CSV with valid columns')
     result = {}
     max_day = dt.datetime.now(dt.timezone(dt.timedelta(hours=9))).date() + dt.timedelta(days=1)
     for lineno, values in enumerate(reader, 2):
@@ -163,6 +164,11 @@ def merge(repo, upload_folder, apply):
             existing = read_csv(path, COLUMNS[network]) if path.exists() else {}
             for key, value in updates.items():
                 before = existing.get(key)
+                # Some portal exports contain SST (3/5 columns) but omit wave fields.
+                # Preserve prior official wave observations for matching station/day;
+                # keep unprovided wave columns blank on genuinely new dates.
+                if len(value) < len(COLUMNS[network]):
+                    value = value + (before[len(value):] if before else [''] * (len(COLUMNS[network]) - len(value)))
                 if before is None: counters['added'] += 1
                 elif before != value: counters['corrected'] += 1
                 else: counters['unchanged'] += 1
