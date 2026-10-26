@@ -42,6 +42,28 @@ class ImportTests(unittest.TestCase):
         self.assertEqual(mf['summary']['coastal']['records'], 1)
         self.assertEqual(mf['summary']['marine']['last_observation'], '2026-10-21')
 
+    def test_coastal_sst_only_preserves_historical_wave_fields(self):
+        self.incoming('지점,일시,평균 수온(°C),최고 수온(°C),최저 수온(°C)\n'
+                      '22441,2026-10-19,22.5,22.7,22.2\n'
+                      '22441,2026-10-20,22.6,22.8,22.3\n',
+                      'OBS_CWBUOY_DD_20261027.csv')
+        result=importer.merge(self.p,self.p/'uploads',apply=True)
+        self.assertEqual((result['added'],result['corrected']), (1,1))
+        data=importer.read_csv(self.p/'data/coastal/2026.csv',importer.C)
+        prior=data[('22441','2026-10-19')]
+        new=data[('22441','2026-10-20')]
+        self.assertEqual(prior[:5], ['22441','2026-10-19','22.5','22.7','22.2'])
+        self.assertEqual(prior[5:], ['.9','.5','1','1.5','4.5','5.2'])
+        self.assertEqual(new[:5], ['22441','2026-10-20','22.6','22.8','22.3'])
+        self.assertEqual(new[5:], [''] * 6)
+        self.assertEqual(len(data), 2)
+
+    def test_reject_truncated_coastal_header(self):
+        self.incoming('지점,일시,최저 수온(°C)\n22441,2026-10-20,21.3\n',
+                      'OBS_CWBUOY_DD_20261027.csv')
+        with self.assertRaises(ValueError):
+            importer.merge(self.p,self.p/'uploads',apply=True)
+
     def test_reject_invalid_file_without_modifying_existing_data(self):
         old=(self.p/'data/marine/2026.csv').read_bytes()
         self.incoming('지점,일시,틀린열\n22101,2026-10-21,20\n')
