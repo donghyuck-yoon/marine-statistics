@@ -3,112 +3,22 @@
   "origin": "기상청 기상자료개방포털 일자료 CSV (이용 시 기상청 출처 표시)",
   "snapshot_download_date": "2026-10-20",
   "autoupdate": false,
-  "description": "2-A static snapshot; NOT connected to live KMA API",
+  "description": "Official KMA data portal daily CSV; manually uploaded, automatically validated and merged",
   "summary": {
     "marine": {
-      "records": 88399,
-      "stations_with_history": 48,
+      "records": 88706,
+      "stations_with_history": 49,
       "first_observation": "2017-01-01",
-      "last_observation": "2026-10-19"
+      "last_observation": "2026-10-26"
     },
     "coastal": {
-      "records": 213279,
+      "records": 213689,
       "stations_with_history": 77,
       "first_observation": "2017-09-01",
-      "last_observation": "2026-10-19"
+      "last_observation": "2026-10-26"
     }
   },
   "datasets": [
-    {
-      "source": "marine",
-      "year": 2017,
-      "path": "data/marine/2017.csv",
-      "rows": 6079,
-      "last_observation": "2017-12-31",
-      "bytes": 131859,
-      "sha256": "f151ffc3d4b8ed35fb5f7c6374b955a0566a419c6e9cef5e3e88fa78deb8aef6"
-    },
-    {
-      "source": "marine",
-      "year": 2018,
-      "path": "data/marine/2018.csv",
-      "rows": 6054,
-      "last_observation": "2018-12-31",
-      "bytes": 131221,
-      "sha256": "4af480a72489e0df4756bfca418a7d76f705fc17789e7d49d2b87de29d3fe9e0"
-    },
-    {
-      "source": "marine",
-      "year": 2019,
-      "path": "data/marine/2019.csv",
-      "rows": 6177,
-      "last_observation": "2019-12-31",
-      "bytes": 133995,
-      "sha256": "c1d2daff5887bea92c53221d2c74db016e826f46bd7a6cf39a303a563a5e2c8e"
-    },
-    {
-      "source": "marine",
-      "year": 2020,
-      "path": "data/marine/2020.csv",
-      "rows": 7471,
-      "last_observation": "2020-12-31",
-      "bytes": 161945,
-      "sha256": "00fbaef32f3bb74de53423ab8aa50b1a556175c0866f4367b6ff0bd235a5e2ea"
-    },
-    {
-      "source": "marine",
-      "year": 2021,
-      "path": "data/marine/2021.csv",
-      "rows": 8184,
-      "last_observation": "2021-12-31",
-      "bytes": 177501,
-      "sha256": "27c82087a3bfb62c56d863d6afa35373bbf209582fd95898863e1b3c074b9a84"
-    },
-    {
-      "source": "marine",
-      "year": 2022,
-      "path": "data/marine/2022.csv",
-      "rows": 8873,
-      "last_observation": "2022-12-31",
-      "bytes": 192400,
-      "sha256": "e7b0b787a1214e13d7d2f15b031dc684c45e461acf6fbbb6e192b72db06818bc"
-    },
-    {
-      "source": "marine",
-      "year": 2023,
-      "path": "data/marine/2023.csv",
-      "rows": 9944,
-      "last_observation": "2023-12-31",
-      "bytes": 215613,
-      "sha256": "e42027d349adc20bff56346055e31205e643f98fd078db45f8e2146e7d43c35f"
-    },
-    {
-      "source": "marine",
-      "year": 2024,
-      "path": "data/marine/2024.csv",
-      "rows": 10479,
-      "last_observation": "2024-12-31",
-      "bytes": 227498,
-      "sha256": "33cb2dbb78f18766a421e3c4893f1374d6e4d15fac76a4ba919f5611508e89bd"
-    },
-    {
-      "source": "marine",
-      "year": 2025,
-      "path": "data/marine/2025.csv",
-      "rows": 12883,
-      "last_observation": "2025-12-31",
-      "bytes": 279376,
-      "sha256": "b65e2f4e276f3fcc720b55b1db82990f0f4b26ff18211a096c2222bc24e3e698"
-    },
-    {
-      "source": "marine",
-      "year": 2026,
-      "path": "data/marine/2026.csv",
-      "rows": 12255,
-      "last_observation": "2026-10-19",
-      "bytes": 265547,
-      "sha256": "3cf210c1a18b3d47bc43c997395d3a2f7edc75de794a44167a7f097cbd663b9a"
-    },
     {
       "source": "coastal",
       "year": 2017,
@@ -194,10 +104,106 @@
       "source": "coastal",
       "year": 2026,
       "path": "data/coastal/2026.csv",
-      "rows": 17218,
-      "last_observation": "2026-10-19",
-      "bytes": 876165,
-      "sha256": "699f6ed17f089a24ec69f00a2b796acaf366fc408c7d31abd78db3719514651d"
+      "rows": 17628,
+      "last_observation": "2026-10-26",
+      "bytes": 891415,
+      "sha256": "6cc6abeddc0ddb8146b46fdbf8ecd1db2cef47a343bc2274ef529c95da5e2444"
+    },
+    {
+      "source": "marine",
+      "year": 2017,
+      "path": "data/marine/2017.csv",
+      "rows": 6079,
+      "last_observation": "2017-12-31",
+      "bytes": 131859,
+      "sha256": "f151ffc3d4b8ed35fb5f7c6374b955a0566a419c6e9cef5e3e88fa78deb8aef6"
+    },
+    {
+      "source": "marine",
+      "year": 2018,
+      "path": "data/marine/2018.csv",
+      "rows": 6054,
+      "last_observation": "2018-12-31",
+      "bytes": 131221,
+      "sha256": "4af480a72489e0df4756bfca418a7d76f705fc17789e7d49d2b87de29d3fe9e0"
+    },
+    {
+      "source": "marine",
+      "year": 2019,
+      "path": "data/marine/2019.csv",
+      "rows": 6177,
+      "last_observation": "2019-12-31",
+      "bytes": 133995,
+      "sha256": "c1d2daff5887bea92c53221d2c74db016e826f46bd7a6cf39a303a563a5e2c8e"
+    },
+    {
+      "source": "marine",
+      "year": 2020,
+      "path": "data/marine/2020.csv",
+      "rows": 7471,
+      "last_observation": "2020-12-31",
+      "bytes": 161945,
+      "sha256": "00fbaef32f3bb74de53423ab8aa50b1a556175c0866f4367b6ff0bd235a5e2ea"
+    },
+    {
+      "source": "marine",
+      "year": 2021,
+      "path": "data/marine/2021.csv",
+      "rows": 8184,
+      "last_observation": "2021-12-31",
+      "bytes": 177501,
+      "sha256": "27c82087a3bfb62c56d863d6afa35373bbf209582fd95898863e1b3c074b9a84"
+    },
+    {
+      "source": "marine",
+      "year": 2022,
+      "path": "data/marine/2022.csv",
+      "rows": 8873,
+      "last_observation": "2022-12-31",
+      "bytes": 192400,
+      "sha256": "e7b0b787a1214e13d7d2f15b031dc684c45e461acf6fbbb6e192b72db06818bc"
+    },
+    {
+      "source": "marine",
+      "year": 2023,
+      "path": "data/marine/2023.csv",
+      "rows": 9944,
+      "last_observation": "2023-12-31",
+      "bytes": 215613,
+      "sha256": "e42027d349adc20bff56346055e31205e643f98fd078db45f8e2146e7d43c35f"
+    },
+    {
+      "source": "marine",
+      "year": 2024,
+      "path": "data/marine/2024.csv",
+      "rows": 10479,
+      "last_observation": "2024-12-31",
+      "bytes": 227498,
+      "sha256": "33cb2dbb78f18766a421e3c4893f1374d6e4d15fac76a4ba919f5611508e89bd"
+    },
+    {
+      "source": "marine",
+      "year": 2025,
+      "path": "data/marine/2025.csv",
+      "rows": 12883,
+      "last_observation": "2025-12-31",
+      "bytes": 279376,
+      "sha256": "b65e2f4e276f3fcc720b55b1db82990f0f4b26ff18211a096c2222bc24e3e698"
+    },
+    {
+      "source": "marine",
+      "year": 2026,
+      "path": "data/marine/2026.csv",
+      "rows": 12562,
+      "last_observation": "2026-10-26",
+      "bytes": 272233,
+      "sha256": "612a95a76a99940bd44e2c15a845eb0f188bfe33daf47e152a620c60c5a5a82d"
     }
+  ],
+  "update_mode": "semi-automatic-official-portal-csv",
+  "last_portal_import_at_kst": "2026-10-27T08:29:26+09:00",
+  "last_portal_import_files": [
+    "OBS_BUOY_DD_20261027080934.csv",
+    "OBS_CWBUOY_DD_20261027080949.csv"
   ]
 }
