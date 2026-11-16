@@ -87,11 +87,17 @@ main > aside, main > div, main section, .panel, #tableSlot, #chartSlot {min-widt
 .daily-config-row label{font-size:11px;font-weight:700;color:var(--muted);display:flex;flex-direction:column;gap:6px}
 .daily-config-row input[type=number]{width:125px;padding:8px}
 .daily-config input[type=color]{border:1px solid #cbd5d0;border-radius:4px;background:#fff;width:54px;height:37px;padding:4px;cursor:pointer}
-.daily-years{display:grid;grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:7px}
+.daily-years{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:7px}
 .daily-year{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:7px 9px;border:1px solid #dbe3e0;border-radius:4px;background:#fff;min-width:0}
 .daily-year label{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;cursor:pointer}
 .daily-year label input{width:auto;accent-color:#096a68}
 .daily-year input[type=color]{width:37px;height:30px}
+.daily-year{gap:9px}
+.daily-year-main{white-space:nowrap}
+.daily-year-bar{font-size:10px!important;font-weight:500!important;white-space:nowrap;color:#566a70}
+.daily-year-bar input{width:13px!important;height:13px;accent-color:#096a68}
+.daily-year-bar input:disabled{opacity:.4}
+.daily-year:has(.daily-year-main input:not(:checked)) .daily-year-bar{opacity:.65}
 @media(max-width:480px){.daily-config-row label{flex:1}.daily-config-row input[type=number]{width:100%}}
 @media(max-width:1040px){.daily-grid{grid-template-columns:1fr}}
 
@@ -109,7 +115,7 @@ main > aside, main > div, main section, .panel, #tableSlot, #chartSlot {min-widt
 </style>
 </head>
 <body>
-<header><div><div class="eyebrow">MARINE CLIMATE / STATISTICS</div><h1>해양관측 통계 분석실</h1><p>공식 일자료 보관 · 필요할 때 CSV 추가 갱신 · 지점 선택 · 월별 / 계절별 통계</p></div><span class="version">VERSION 1.5 · INTEGER Y-AXIS</span></header>
+<header><div><div class="eyebrow">MARINE CLIMATE / STATISTICS</div><h1>해양관측 통계 분석실</h1><p>공식 일자료 보관 · 필요할 때 CSV 추가 갱신 · 지점 선택 · 월별 / 계절별 통계</p></div><span class="version">VERSION 1.6 · ANOMALY BARS</span></header>
 <nav class="stat-tabs" aria-label="분석 화면 선택">
 <button type="button" class="stat-tab active" id="tabStatistics" role="tab" aria-selected="true" aria-controls="statisticsTabPanel">월별·계절별 통계</button>
 <button type="button" class="stat-tab" id="tabDaily" role="tab" aria-selected="false" aria-controls="dailyTabPanel">일별 해수면온도 시계열</button>
@@ -174,9 +180,9 @@ main > aside, main > div, main section, .panel, #tableSlot, #chartSlot {min-widt
     <label for="dailyAvgEnd">평균 종료연도<input id="dailyAvgEnd" type="number" min="1900" max="2100" value="2025"></label>
     <label for="dailyAvgColor">평균선 색상<input id="dailyAvgColor" type="color" value="#171b20"></label>
   </div>
-  <div class="daily-config-header"><strong>개별 연도 선택 · 색상</strong><div class="daily-actions"><button type="button" class="secondary" id="dailySelectAll">모두 선택</button><button type="button" class="secondary" id="dailySelectNone">모두 해제</button></div></div>
+  <div class="daily-config-header"><strong>개별 연도 선택 · 색상 · 편차 막대</strong><div class="daily-actions"><button type="button" class="secondary" id="dailySelectAll">모두 선택</button><button type="button" class="secondary" id="dailySelectNone">모두 해제</button></div></div>
   <div id="dailyYears" class="daily-years"><span class="caption">공식자료를 불러오면 보유 연도가 표시됩니다.</span></div>
-  <p class="caption" style="margin:9px 0 0">체크한 연도만 시계열에 표시됩니다. 연도별 색상과 평균선 색상을 각각 변경할 수 있으며, SVG·CSV 다운로드에도 반영됩니다.</p>
+  <p class="caption" style="margin:9px 0 0">연도를 체크하면 시계열이 표시됩니다. 해당 연도의 <b>편차 막대</b>를 추가로 체크하면 기준기간 일별 평균보다 높은 날은 <b style="color:#df3d3d">빨강(+)</b>, 낮은 날은 <b style="color:#256bd8">파랑(−)</b> 막대로 함께 그립니다. 결측일은 제외합니다.</p>
 </div>
 <p class="caption">해양기상부이 공식 17개 지점 고정 · 우리나라 주변 해역, 서해, 남해, 동해 총 4개 그래프. 선택한 날짜 범위를 각 연도에 동일하게 적용합니다. 날짜의 연도는 이 탭의 대상 연도를 따릅니다.</p>
 <div id="dailyNote" class="caption" style="margin:10px 0">저장된 공식 일자료로 시계열을 생성할 수 있습니다.</div>
@@ -518,23 +524,37 @@ function dailyColorValid(v){return /^#[0-9a-f]{6}$/i.test(v);}
 function dailyYearColor(y,target){if(y===target)return '#df3d3d';if(y===target-1)return '#256bd8';return '#c9cecf';}
 function refreshDailyYearPicker(){
  const root=$('dailyYears');if(!root)return;
- const prev=new Map([...root.querySelectorAll('.daily-year')].map(node=>[Number(node.dataset.year),{checked:node.querySelector('input[type=checkbox]').checked,color:node.querySelector('input[type=color]').value}]));
+ const prev=new Map([...root.querySelectorAll('.daily-year')].map(node=>[Number(node.dataset.year),{
+  checked:node.querySelector('.daily-year-main input[type=checkbox]').checked,
+  color:node.querySelector('input[type=color]').value,
+  bar:node.querySelector('input.daily-anomaly')?.checked||false
+ }]));
  const years=[...new Set(STORE.records.filter(r=>r.source==='marine'&&Object.prototype.hasOwnProperty.call(MARINE_IDS,String(r.id))&&Number.isFinite(r.sst)).map(r=>r.year))].sort((a,b)=>a-b);
  const target=Number($('dailyTargetYear').value);
  root.replaceChildren();
  if(!years.length){const item=document.createElement('span');item.className='caption';item.textContent='관측자료를 불러오면 선택 가능한 연도가 표시됩니다.';root.append(item);return;}
  for(const yr of years){
   const wrap=document.createElement('div');wrap.className='daily-year';wrap.dataset.year=String(yr);
-  const label=document.createElement('label');const cb=document.createElement('input');cb.type='checkbox';
-  cb.checked=prev.has(yr)?prev.get(yr).checked:yr===target||yr===target-1;
+  const label=document.createElement('label');label.className='daily-year-main';
+  const cb=document.createElement('input');cb.type='checkbox';cb.checked=prev.has(yr)?prev.get(yr).checked:yr===target||yr===target-1;
   const txt=document.createElement('span');txt.textContent=String(yr);label.append(cb,txt);
   const color=document.createElement('input');color.type='color';color.title=yr+'년 시계열 색상';color.setAttribute('aria-label',yr+'년 선 색상');
   color.value=prev.has(yr)?prev.get(yr).color:dailyYearColor(yr,target);
-  wrap.append(label,color);root.append(wrap);
+  const barLabel=document.createElement('label');barLabel.className='daily-year-bar';
+  const bar=document.createElement('input');bar.type='checkbox';bar.className='daily-anomaly';
+  bar.checked=prev.has(yr)?prev.get(yr).bar&&cb.checked:false;bar.disabled=!cb.checked;
+  const barTxt=document.createElement('span');barTxt.textContent='편차 막대';
+  barLabel.append(bar,barTxt);
+  cb.onchange=()=>{bar.disabled=!cb.checked;if(!cb.checked)bar.checked=false;};
+  wrap.append(label,barLabel,color);root.append(wrap);
  }
 }
 function dailySelectedYears(){
- return [...$('dailyYears').querySelectorAll('.daily-year')].filter(node=>node.querySelector('input[type=checkbox]').checked).map(node=>({year:Number(node.dataset.year),color:node.querySelector('input[type=color]').value})).sort((a,b)=>a.year-b.year);
+ return [...$('dailyYears').querySelectorAll('.daily-year')].filter(node=>node.querySelector('.daily-year-main input[type=checkbox]').checked).map(node=>({
+  year:Number(node.dataset.year),
+  color:node.querySelector('input[type=color]').value,
+  bar:node.querySelector('input.daily-anomaly')?.checked||false
+ })).sort((a,b)=>a.year-b.year);
 }
 function dailySstData(){
  if(!STORE.records.length)throw new Error('공식 CSV를 먼저 불러와 주세요.');
@@ -585,40 +605,81 @@ function dailySstData(){
  return {target,avgStart,avgEnd,avgYears,avgColor,selected,years,days,byRegion,dateFrom,dateTo};
 }
 function dailySstSvg(region,model){
- const w=940,left=60,right=910,top=38,bottom=263,days=model.days;
+ const w=940,left=86,right=910,top=23,bottom=247,days=model.days;
  const data=model.byRegion[region],valid=[...data.avg.filter(Number.isFinite)];
  for(const item of model.selected)valid.push(...data.lines[item.year].filter(Number.isFinite));
  const vmin=valid.length?Math.min(...valid):0,vmax=valid.length?Math.max(...valid):1;
- // Integer-only Y-axis ticks; choose a readable 1, 2, 5, 10... degree interval.
+ // Y-axis for SST: integers only, using clean 1/2/5/10 Celsius degree steps.
  const desired=Math.max(1,(vmax-vmin)/5);
  const power=Math.pow(10,Math.floor(Math.log10(desired)));
- const tickSize=[1,2,5,10].map(m=>m*power).find(step=>step>=desired)||10*power;
+ const tickSize=[1,2,5,10].map(n=>n*power).find(v=>v>=desired)||10*power;
  let lo=Math.floor(vmin/tickSize)*tickSize,hi=Math.ceil(vmax/tickSize)*tickSize;
  if(hi<=lo){lo-=tickSize;hi+=tickSize;}
  const x=i=>left+(right-left)*i/Math.max(1,days.length-1),y=v=>bottom-(v-lo)*(bottom-top)/(hi-lo);
  const escSvg=v=>String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
- function paths(a,color,width,opacity){
+ function paths(arr,color,width,opacity){
   const blocks=[];let current=[];
-  function flush(){if(current.length){blocks.push('<path d="'+current.join(' ')+'" stroke="'+color+'" stroke-width="'+width+'" opacity="'+opacity+'" fill="none" stroke-linecap="round" stroke-linejoin="round"/>');current=[];}}
-  a.forEach((v,i)=>{if(Number.isFinite(v))current.push((current.length?'L':'M')+x(i).toFixed(2)+','+y(v).toFixed(2));else flush();});
+  function flush(){
+   if(current.length===1){blocks.push('<circle cx="'+current[0][0]+'" cy="'+current[0][1]+'" r="'+(width+0.4)+'" fill="'+color+'" opacity="'+opacity+'"/>');}
+   else if(current.length>1)blocks.push('<path d="'+current.map((p,i)=>(i?'L':'M')+p[0]+','+p[1]).join(' ')+'" stroke="'+color+'" stroke-width="'+width+'" opacity="'+opacity+'" fill="none" stroke-linecap="round" stroke-linejoin="round"/>');
+   current=[];
+  }
+  arr.forEach((v,i)=>{if(Number.isFinite(v))current.push([x(i).toFixed(2),y(v).toFixed(2)]);else flush();});
   flush();return blocks.join('');
  }
- const yTickCount=Math.round((hi-lo)/tickSize);
- const grid=Array.from({length:yTickCount+1},(_,i)=>lo+i*tickSize).map(v=>'<line x1="'+left+'" y1="'+y(v)+'" x2="'+right+'" y2="'+y(v)+'" stroke="#e6ecea"/><text x="'+(left-9)+'" y="'+(y(v)+4)+'" fill="#627079" font-size="12" text-anchor="end">'+Math.round(v)+'</text>').join('');
+ const grid=Array.from({length:Math.round((hi-lo)/tickSize)+1},(_,i)=>lo+i*tickSize).map(v=>'<line x1="'+left+'" y1="'+y(v)+'" x2="'+right+'" y2="'+y(v)+'" stroke="#e6ecea"/><text x="'+(left-9)+'" y="'+(y(v)+4)+'" fill="#627079" font-size="12" text-anchor="end">'+Math.round(v)+'</text>').join('');
+ const monthIdx=[];for(let i=1;i<days.length;i++)if(days[i].slice(0,2)!==days[i-1].slice(0,2))monthIdx.push(i);
+ const monthLines=(t,b)=>monthIdx.map(i=>'<line x1="'+x(i-0.5)+'" y1="'+t+'" x2="'+x(i-0.5)+'" y2="'+b+'" stroke="#95a7a6" stroke-width="1.3" stroke-dasharray="5 4"/>').join('');
  const step=Math.max(1,Math.ceil((days.length-1)/10)),tickIdx=[];
  for(let i=0;i<days.length;i+=step)tickIdx.push(i);
  if(tickIdx[tickIdx.length-1]!==days.length-1)tickIdx.push(days.length-1);
- const ticks=tickIdx.map(i=>'<text x="'+x(i)+'" y="'+(bottom+20)+'" font-size="12" fill="#627079" text-anchor="middle">'+days[i]+'</text>').join('');
+ const ticks=tickIdx.map(i=>'<text x="'+x(i)+'" y="'+(bottom+19)+'" font-size="12" fill="#627079" text-anchor="middle">'+days[i]+'</text>').join('');
  const lines=model.selected.map(item=>paths(data.lines[item.year],item.color,2.5,1)).join('');
  const avg=paths(data.avg,model.avgColor,3,1);
- const legend=[...model.selected.map(o=>[String(o.year),o.color]),[model.avgStart+'–'+model.avgEnd+' 평균',model.avgColor]];
- const legendCols=4,legendRowHeight=24,legendRows=Math.max(1,Math.ceil(legend.length/legendCols));
- const legendStart=302,height=legendStart+legendRows*legendRowHeight+12;
- const legends=legend.map((entry,i)=>{const col=i%legendCols,row=Math.floor(i/legendCols),lx=left+col*210,ly=legendStart+row*legendRowHeight;return '<line x1="'+lx+'" x2="'+(lx+26)+'" y1="'+ly+'" y2="'+ly+'" stroke="'+entry[1]+'" stroke-width="3"/><text x="'+(lx+34)+'" y="'+(ly+5)+'" font-size="12" fill="#34444a">'+escSvg(entry[0])+'</text>';}).join('');
- return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+w+' '+height+'" role="img" aria-label="'+escSvg(region+' 일별 해수면온도')+'"><rect width="'+w+'" height="'+height+'" fill="#fff"/>'+
- '<text x="'+left+'" y="23" font-size="18" fill="#19323b" font-weight="700">'+escSvg(region)+'</text>'+
- '<text x="'+right+'" y="23" font-size="12" fill="#627079" text-anchor="end">해수면온도 (℃) · '+model.dateFrom.slice(5)+' ~ '+model.dateTo.slice(5)+'</text>'+
- grid+'<line x1="'+left+'" y1="'+bottom+'" x2="'+right+'" y2="'+bottom+'" stroke="#aeb7b6"/>'+ticks+lines+avg+legends+'</svg>';
+ // One legend entry for all default-grey years. Non-contiguous selections list compact sub-ranges.
+ function compactRanges(years){
+  const sorted=[...years].sort((a,b)=>a-b),groups=[];
+  for(let i=0;i<sorted.length;){let j=i;while(j+1<sorted.length&&sorted[j+1]===sorted[j]+1)j++;groups.push(i===j?String(sorted[i]):sorted[i]+'~'+sorted[j]);i=j+1;}
+  return groups.join(', ');
+ }
+ const gray=model.selected.filter(item=>item.color.toLowerCase()==='#c9cecf').map(item=>item.year);
+ const distinct=model.selected.filter(item=>item.color.toLowerCase()!=='#c9cecf');
+ const legend=[...(gray.length?[[compactRanges(gray),'#c9cecf']]:[]),...distinct.map(item=>[String(item.year),item.color]),[model.avgStart+'~'+model.avgEnd+' 평균',model.avgColor]];
+ const legendCols=3,legendRowHeight=25,legendRows=Math.max(1,Math.ceil(legend.length/legendCols));
+ const legendStart=300,legendEnd=legendStart+legendRows*legendRowHeight;
+ const legends=legend.map((entry,i)=>{const col=i%legendCols,row=Math.floor(i/legendCols),lx=left+col*275,ly=legendStart+row*legendRowHeight;return '<line x1="'+lx+'" x2="'+(lx+25)+'" y1="'+ly+'" y2="'+ly+'" stroke="'+entry[1]+'" stroke-width="3"/><text x="'+(lx+31)+'" y="'+(ly+5)+'" font-size="12" fill="#34444a">'+escSvg(entry[0])+'</text>';}).join('');
+ const titleYLabel='<text x="20" y="'+((top+bottom)/2)+'" transform="rotate(-90 20 '+((top+bottom)/2)+')" fill="#263940" font-size="14" text-anchor="middle">해수면 온도(℃)</text>';
+ const lineArea=grid+monthLines(top,bottom)+'<line x1="'+left+'" y1="'+bottom+'" x2="'+right+'" y2="'+bottom+'" stroke="#aeb7b6"/>'+ticks+lines+avg+legends+titleYLabel;
+ const barYears=model.selected.filter(item=>item.bar);
+ let extras='';
+ for(let idx=0;idx<barYears.length;idx++){
+  const item=barYears[idx],baseTop=legendEnd+23+idx*156;
+  const barTop=baseTop+28,barBottom=baseTop+130,mid=(barTop+barBottom)/2,half=(barBottom-barTop)/2;
+  const diffs=data.lines[item.year].map((v,i)=>Number.isFinite(v)&&Number.isFinite(data.avg[i])?v-data.avg[i]:null);
+  const maxAbs=Math.max(0.05,...diffs.filter(Number.isFinite).map(Math.abs));
+  const rawMax=maxAbs*1.12,steps=[.1,.2,.3,.5,1,1.5,2,3,5,10,15,20,30,50,100];
+  const axisMax=steps.find(z=>z>=rawMax)||Math.ceil(rawMax/50)*50;
+  const barWidth=Math.min(12,Math.max(1.5,(right-left)/days.length*.85));
+  const posY=v=>mid-(v/axisMax)*half;
+  const bars=diffs.map((v,i)=>{
+   if(!Number.isFinite(v)||v===0)return '';
+   const yc=posY(v),h=Math.abs(yc-mid);
+   return '<rect x="'+(x(i)-barWidth/2).toFixed(2)+'" y="'+Math.min(yc,mid).toFixed(2)+'" width="'+barWidth.toFixed(2)+'" height="'+Math.max(.4,h).toFixed(2)+'" fill="'+(v>0?'#df3d3d':'#256bd8')+'"/>';
+  }).join('');
+  const mag=axisMax<1?axisMax.toFixed(1):String(axisMax);
+  extras+='<text x="'+left+'" y="'+(baseTop+14)+'" font-size="14" font-weight="700" fill="#263940">'+item.year+'년 일별 편차</text>'+
+   '<text x="'+right+'" y="'+(baseTop+14)+'" font-size="11" text-anchor="end" fill="#6b777a">평균 초과: 빨강(+) / 평균 미만: 파랑(−)</text>'+
+   '<line x1="'+left+'" y1="'+barTop+'" x2="'+right+'" y2="'+barTop+'" stroke="#e6ecea"/>'+
+   '<line x1="'+left+'" y1="'+barBottom+'" x2="'+right+'" y2="'+barBottom+'" stroke="#e6ecea"/>'+
+   monthLines(barTop,barBottom)+bars+
+   '<line x1="'+left+'" y1="'+mid+'" x2="'+right+'" y2="'+mid+'" stroke="#687b80" stroke-width="1.2"/>'+
+   '<text x="'+(left-9)+'" y="'+(barTop+4)+'" font-size="11" text-anchor="end" fill="#627079">+'+mag+'</text>'+
+   '<text x="'+(left-9)+'" y="'+(mid+4)+'" font-size="11" text-anchor="end" fill="#627079">0</text>'+
+   '<text x="'+(left-9)+'" y="'+(barBottom+4)+'" font-size="11" text-anchor="end" fill="#627079">−'+mag+'</text>'+
+   '<text x="20" y="'+mid+'" transform="rotate(-90 20 '+mid+')" fill="#263940" font-size="12" text-anchor="middle">편차(℃)</text>';
+ }
+ const height=legendEnd+(barYears.length?35+barYears.length*156:14);
+ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+w+' '+height+'" role="img" aria-label="'+escSvg(region+' 일별 해수면온도 및 평균 대비 편차')+'"><rect width="'+w+'" height="'+height+'" fill="#fff"/>'+lineArea+extras+'</svg>';
 }
 function makeDailySst(){
  try{
@@ -639,10 +700,12 @@ function makeDailySst(){
 }
 function downloadDailySstCsv(){
  const m=STORE.dailySst;if(!m)return;
- const headers=['해역','월일',...m.selected.map(o=>String(o.year)),m.avgStart+'-'+m.avgEnd+' 평균'];
+ const headers=['해역','월일',...m.selected.map(o=>String(o.year)),m.avgStart+'-'+m.avgEnd+' 평균',...m.selected.filter(o=>o.bar).map(o=>o.year+'년 평균 대비 편차(℃)')];
  const rr=[];
  for(const reg of ['우리나라 주변 해역','서해','남해','동해'])for(let i=0;i<m.days.length;i++){
-  rr.push([reg,m.days[i],...m.selected.map(o=>m.byRegion[reg].lines[o.year][i]),m.byRegion[reg].avg[i]].map(v=>typeof v==='number'?(Number.isFinite(v)?v.toFixed(5):''):v??''));
+  const base=m.byRegion[reg].avg[i];
+  const anomalies=m.selected.filter(o=>o.bar).map(o=>{const v=m.byRegion[reg].lines[o.year][i];return Number.isFinite(v)&&Number.isFinite(base)?v-base:null;});
+  rr.push([reg,m.days[i],...m.selected.map(o=>m.byRegion[reg].lines[o.year][i]),base,...anomalies].map(v=>typeof v==='number'?(Number.isFinite(v)?v.toFixed(5):''):v??''));
  }
  dl('daily_sst_'+m.dateFrom+'_'+m.dateTo+'.csv',dCsv(headers,rr),'text/csv;charset=utf-8');
 }
