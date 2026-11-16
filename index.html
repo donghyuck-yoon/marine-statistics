@@ -115,7 +115,7 @@ main > aside, main > div, main section, .panel, #tableSlot, #chartSlot {min-widt
 </style>
 </head>
 <body>
-<header><div><div class="eyebrow">MARINE CLIMATE / STATISTICS</div><h1>해양관측 통계 분석실</h1><p>공식 일자료 보관 · 필요할 때 CSV 추가 갱신 · 지점 선택 · 월별 / 계절별 통계</p></div><span class="version">VERSION 1.6 · ANOMALY BARS</span></header>
+<header><div><div class="eyebrow">MARINE CLIMATE / STATISTICS</div><h1>해양관측 통계 분석실</h1><p>공식 일자료 보관 · 필요할 때 CSV 추가 갱신 · 지점 선택 · 월별 / 계절별 통계</p></div><span class="version">VERSION 1.7 · OVERLAY BARS</span></header>
 <nav class="stat-tabs" aria-label="분석 화면 선택">
 <button type="button" class="stat-tab active" id="tabStatistics" role="tab" aria-selected="true" aria-controls="statisticsTabPanel">월별·계절별 통계</button>
 <button type="button" class="stat-tab" id="tabDaily" role="tab" aria-selected="false" aria-controls="dailyTabPanel">일별 해수면온도 시계열</button>
@@ -182,7 +182,7 @@ main > aside, main > div, main section, .panel, #tableSlot, #chartSlot {min-widt
   </div>
   <div class="daily-config-header"><strong>개별 연도 선택 · 색상 · 편차 막대</strong><div class="daily-actions"><button type="button" class="secondary" id="dailySelectAll">모두 선택</button><button type="button" class="secondary" id="dailySelectNone">모두 해제</button></div></div>
   <div id="dailyYears" class="daily-years"><span class="caption">공식자료를 불러오면 보유 연도가 표시됩니다.</span></div>
-  <p class="caption" style="margin:9px 0 0">연도를 체크하면 시계열이 표시됩니다. 해당 연도의 <b>편차 막대</b>를 추가로 체크하면 기준기간 일별 평균보다 높은 날은 <b style="color:#df3d3d">빨강(+)</b>, 낮은 날은 <b style="color:#256bd8">파랑(−)</b> 막대로 함께 그립니다. 결측일은 제외합니다.</p>
+  <p class="caption" style="margin:9px 0 0">연도를 체크하면 시계열이 표시됩니다. 해당 연도의 <b>편차 막대</b>를 추가로 체크하면 <b>기존 시계열 그래프 안에서 검정색 기준기간 평균선부터</b> 관측값까지 막대가 뻗습니다. 평균보다 높으면 <b style="color:#df3d3d">빨강(+)</b>, 낮으면 <b style="color:#256bd8">파랑(−)</b>으로 표시합니다. 결측일은 제외합니다.</p>
 </div>
 <p class="caption">해양기상부이 공식 17개 지점 고정 · 우리나라 주변 해역, 서해, 남해, 동해 총 4개 그래프. 선택한 날짜 범위를 각 연도에 동일하게 적용합니다. 날짜의 연도는 이 탭의 대상 연도를 따릅니다.</p>
 <div id="dailyNote" class="caption" style="margin:10px 0">저장된 공식 일자료로 시계열을 생성할 수 있습니다.</div>
@@ -644,42 +644,30 @@ function dailySstSvg(region,model){
  }
  const gray=model.selected.filter(item=>item.color.toLowerCase()==='#c9cecf').map(item=>item.year);
  const distinct=model.selected.filter(item=>item.color.toLowerCase()!=='#c9cecf');
- const legend=[...(gray.length?[[compactRanges(gray),'#c9cecf']]:[]),...distinct.map(item=>[String(item.year),item.color]),[model.avgStart+'~'+model.avgEnd+' 평균',model.avgColor]];
+ const barYears=model.selected.filter(item=>item.bar);
+ const legend=[...(gray.length?[[compactRanges(gray),'#c9cecf']]:[]),...distinct.map(item=>[String(item.year),item.color]),[model.avgStart+'~'+model.avgEnd+' 평균',model.avgColor],...(barYears.length?[['평균 초과 (+)','#df3d3d','bar'],['평균 미만 (−)','#256bd8','bar']]:[])];
  const legendCols=3,legendRowHeight=25,legendRows=Math.max(1,Math.ceil(legend.length/legendCols));
  const legendStart=300,legendEnd=legendStart+legendRows*legendRowHeight;
- const legends=legend.map((entry,i)=>{const col=i%legendCols,row=Math.floor(i/legendCols),lx=left+col*275,ly=legendStart+row*legendRowHeight;return '<line x1="'+lx+'" x2="'+(lx+25)+'" y1="'+ly+'" y2="'+ly+'" stroke="'+entry[1]+'" stroke-width="3"/><text x="'+(lx+31)+'" y="'+(ly+5)+'" font-size="12" fill="#34444a">'+escSvg(entry[0])+'</text>';}).join('');
+ const legends=legend.map((entry,i)=>{const col=i%legendCols,row=Math.floor(i/legendCols),lx=left+col*275,ly=legendStart+row*legendRowHeight;const symbol=entry[2]==='bar'?'<rect x="'+lx+'" y="'+(ly-8)+'" width="25" height="13" rx="1" fill="'+entry[1]+'" opacity=".75"/>':'<line x1="'+lx+'" x2="'+(lx+25)+'" y1="'+ly+'" y2="'+ly+'" stroke="'+entry[1]+'" stroke-width="3"/>';return symbol+'<text x="'+(lx+31)+'" y="'+(ly+5)+'" font-size="12" fill="#34444a">'+escSvg(entry[0])+'</text>';}).join('');
  const titleYLabel='<text x="20" y="'+((top+bottom)/2)+'" transform="rotate(-90 20 '+((top+bottom)/2)+')" fill="#263940" font-size="14" text-anchor="middle">해수면 온도(℃)</text>';
- const lineArea=grid+monthLines(top,bottom)+'<line x1="'+left+'" y1="'+bottom+'" x2="'+right+'" y2="'+bottom+'" stroke="#aeb7b6"/>'+ticks+lines+avg+legends+titleYLabel;
- const barYears=model.selected.filter(item=>item.bar);
- let extras='';
- for(let idx=0;idx<barYears.length;idx++){
-  const item=barYears[idx],baseTop=legendEnd+23+idx*156;
-  const barTop=baseTop+28,barBottom=baseTop+130,mid=(barTop+barBottom)/2,half=(barBottom-barTop)/2;
-  const diffs=data.lines[item.year].map((v,i)=>Number.isFinite(v)&&Number.isFinite(data.avg[i])?v-data.avg[i]:null);
-  const maxAbs=Math.max(0.05,...diffs.filter(Number.isFinite).map(Math.abs));
-  const rawMax=maxAbs*1.12,steps=[.1,.2,.3,.5,1,1.5,2,3,5,10,15,20,30,50,100];
-  const axisMax=steps.find(z=>z>=rawMax)||Math.ceil(rawMax/50)*50;
-  const barWidth=Math.min(12,Math.max(1.5,(right-left)/days.length*.85));
-  const posY=v=>mid-(v/axisMax)*half;
-  const bars=diffs.map((v,i)=>{
-   if(!Number.isFinite(v)||v===0)return '';
-   const yc=posY(v),h=Math.abs(yc-mid);
-   return '<rect x="'+(x(i)-barWidth/2).toFixed(2)+'" y="'+Math.min(yc,mid).toFixed(2)+'" width="'+barWidth.toFixed(2)+'" height="'+Math.max(.4,h).toFixed(2)+'" fill="'+(v>0?'#df3d3d':'#256bd8')+'"/>';
+ // Anomaly columns share the original SST Y-axis and are anchored to the daily mean curve.
+ const barGroupWidth=Math.min(14,(right-left)/Math.max(1,days.length-1)*.86);
+ const colWidth=barYears.length?Math.max(.5,barGroupWidth/barYears.length*.89):0;
+ let anomalyBars='';
+ for(let yi=0;yi<barYears.length;yi++){
+  const item=barYears[yi],values=data.lines[item.year];
+  anomalyBars+=values.map((v,i)=>{
+   const ref=data.avg[i];if(!Number.isFinite(v)||!Number.isFinite(ref)||Math.abs(v-ref)<1e-10)return '';
+   const center=x(i)+((yi+.5)/barYears.length-.5)*barGroupWidth;
+   const yMean=y(ref),yObs=y(v),rectTop=Math.min(yMean,yObs),rectHeight=Math.abs(yMean-yObs);
+   const color=v>ref?'#df3d3d':'#256bd8';
+   return '<rect class="daily-anomaly-bar" data-year="'+item.year+'" x="'+(center-colWidth/2).toFixed(2)+'" y="'+rectTop.toFixed(2)+'" width="'+colWidth.toFixed(2)+'" height="'+Math.max(.35,rectHeight).toFixed(2)+'" fill="'+color+'" opacity=".70"><title>'+item.year+'년 '+days[i]+' · 관측 '+v.toFixed(2)+'℃ · 평균 '+ref.toFixed(2)+'℃ · 편차 '+(v-ref>0?'+':'')+(v-ref).toFixed(2)+'℃</title></rect>';
   }).join('');
-  const mag=axisMax<1?axisMax.toFixed(1):String(axisMax);
-  extras+='<text x="'+left+'" y="'+(baseTop+14)+'" font-size="14" font-weight="700" fill="#263940">'+item.year+'년 일별 편차</text>'+
-   '<text x="'+right+'" y="'+(baseTop+14)+'" font-size="11" text-anchor="end" fill="#6b777a">평균 초과: 빨강(+) / 평균 미만: 파랑(−)</text>'+
-   '<line x1="'+left+'" y1="'+barTop+'" x2="'+right+'" y2="'+barTop+'" stroke="#e6ecea"/>'+
-   '<line x1="'+left+'" y1="'+barBottom+'" x2="'+right+'" y2="'+barBottom+'" stroke="#e6ecea"/>'+
-   monthLines(barTop,barBottom)+bars+
-   '<line x1="'+left+'" y1="'+mid+'" x2="'+right+'" y2="'+mid+'" stroke="#687b80" stroke-width="1.2"/>'+
-   '<text x="'+(left-9)+'" y="'+(barTop+4)+'" font-size="11" text-anchor="end" fill="#627079">+'+mag+'</text>'+
-   '<text x="'+(left-9)+'" y="'+(mid+4)+'" font-size="11" text-anchor="end" fill="#627079">0</text>'+
-   '<text x="'+(left-9)+'" y="'+(barBottom+4)+'" font-size="11" text-anchor="end" fill="#627079">−'+mag+'</text>'+
-   '<text x="20" y="'+mid+'" transform="rotate(-90 20 '+mid+')" fill="#263940" font-size="12" text-anchor="middle">편차(℃)</text>';
  }
- const height=legendEnd+(barYears.length?35+barYears.length*156:14);
- return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+w+' '+height+'" role="img" aria-label="'+escSvg(region+' 일별 해수면온도 및 평균 대비 편차')+'"><rect width="'+w+'" height="'+height+'" fill="#fff"/>'+lineArea+extras+'</svg>';
+ // Keep colored bars below the year curves and the reference mean line.
+ const lineArea=grid+monthLines(top,bottom)+'<line x1="'+left+'" y1="'+bottom+'" x2="'+right+'" y2="'+bottom+'" stroke="#aeb7b6"/>'+ticks+anomalyBars+lines+avg+legends+titleYLabel;
+ const height=legendEnd+16;
+ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+w+' '+height+'" role="img" aria-label="'+escSvg(region+' 일별 해수면온도 및 평균선 기준 편차 막대')+'"><rect width="'+w+'" height="'+height+'" fill="#fff"/>'+lineArea+'</svg>';
 }
 function makeDailySst(){
  try{
