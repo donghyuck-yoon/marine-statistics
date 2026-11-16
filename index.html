@@ -80,11 +80,24 @@ main > aside, main > div, main section, .panel, #tableSlot, #chartSlot {min-widt
 .daily-range label{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700;color:var(--ink)}
 .daily-range input[type=date]{min-width:165px;padding:8px 10px;border:1px solid var(--line);border-radius:3px;background:#fff}
 .daily-separator{padding-bottom:10px;color:var(--muted)}
+.daily-config{border:1px solid #dce3df;background:#fafcfb;padding:13px;margin-bottom:13px;border-radius:4px}
+.daily-config-header{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:10px}
+.daily-config-header strong{font-size:12px}
+.daily-config-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px;align-items:end}
+.daily-config-row label{font-size:11px;font-weight:700;color:var(--muted);display:flex;flex-direction:column;gap:6px}
+.daily-config-row input[type=number]{width:125px;padding:8px}
+.daily-config input[type=color]{border:1px solid #cbd5d0;border-radius:4px;background:#fff;width:54px;height:37px;padding:4px;cursor:pointer}
+.daily-years{display:grid;grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:7px}
+.daily-year{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:7px 9px;border:1px solid #dbe3e0;border-radius:4px;background:#fff;min-width:0}
+.daily-year label{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;cursor:pointer}
+.daily-year label input{width:auto;accent-color:#096a68}
+.daily-year input[type=color]{width:37px;height:30px}
+@media(max-width:480px){.daily-config-row label{flex:1}.daily-config-row input[type=number]{width:100%}}
 @media(max-width:1040px){.daily-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<header><div><div class="eyebrow">MARINE CLIMATE / STATISTICS</div><h1>해양관측 통계 분석실</h1><p>공식 일자료 보관 · 필요할 때 CSV 추가 갱신 · 지점 선택 · 월별 / 계절별 통계</p></div><span class="version">VERSION 1.2 · DATE RANGE</span></header>
+<header><div><div class="eyebrow">MARINE CLIMATE / STATISTICS</div><h1>해양관측 통계 분석실</h1><p>공식 일자료 보관 · 필요할 때 CSV 추가 갱신 · 지점 선택 · 월별 / 계절별 통계</p></div><span class="version">VERSION 1.3 · CUSTOM LINES</span></header>
 <main><aside>
 <h2>01 / 관측자료</h2>
 <div class="caption method-note" style="margin-bottom:12px"><b>저장된 공식 일자료 자동 불러오기</b><div style="margin-top:5px">기존 GitHub 공식 CSV는 사이트 접속 시 자동 로딩됩니다. 새 날짜의 공식 CSV만 직접 올리면 기존 자료와 합쳐 <b>이 브라우저에 저장</b>됩니다. API 시간자료를 이용한 재계산은 하지 않습니다.</div></div>
@@ -135,7 +148,18 @@ main > aside, main > div, main section, .panel, #tableSlot, #chartSlot {min-widt
 <section class="panel" id="dailySstPanel">
 <div class="toolbar"><h2 style="margin:0">일별 해수면온도 비교</h2><div class="daily-actions"><button class="secondary" id="dailyMake">시계열 4장 생성</button><button class="secondary" id="dailyCsv" disabled>일별 자료 CSV</button></div></div>
 <div class="daily-range" role="group" aria-label="시계열 날짜 범위"><label for="dailyDateFrom">시작일<input id="dailyDateFrom" type="date" value="2026-09-01"></label><span class="daily-separator">~</span><label for="dailyDateTo">종료일<input id="dailyDateTo" type="date" value="2026-10-31"></label></div>
-<p class="caption">시작일과 종료일을 선택하면 같은 월·일을 직전 10개년과 비교합니다. 해양기상부이 공식 17개 지점 · 과거 9개년(옅은 회색), 전년(파란색), 대상연도(빨간색), 이전 10개년 평균(검정색). 대상 연도는 왼쪽에서 변경하세요.</p>
+<div class="daily-config">
+  <div class="daily-config-header"><strong>평균선 기준연도</strong><span class="caption">기준기간의 각 날짜별 평균을 계산합니다.</span></div>
+  <div class="daily-config-row">
+    <label for="dailyAvgStart">평균 시작연도<input id="dailyAvgStart" type="number" min="1900" max="2100" value="2016"></label>
+    <label for="dailyAvgEnd">평균 종료연도<input id="dailyAvgEnd" type="number" min="1900" max="2100" value="2025"></label>
+    <label for="dailyAvgColor">평균선 색상<input id="dailyAvgColor" type="color" value="#171b20"></label>
+  </div>
+  <div class="daily-config-header"><strong>개별 연도 선택 · 색상</strong><div class="daily-actions"><button type="button" class="secondary" id="dailySelectAll">모두 선택</button><button type="button" class="secondary" id="dailySelectNone">모두 해제</button></div></div>
+  <div id="dailyYears" class="daily-years"><span class="caption">공식자료를 불러오면 보유 연도가 표시됩니다.</span></div>
+  <p class="caption" style="margin:9px 0 0">체크한 연도만 시계열에 표시됩니다. 연도별 색상과 평균선 색상을 각각 변경할 수 있으며, SVG·CSV 다운로드에도 반영됩니다.</p>
+</div>
+<p class="caption">해양기상부이 공식 17개 지점 고정 · 우리나라 주변 해역, 서해, 남해, 동해 총 4개 그래프. 선택한 날짜 범위를 각 연도에 동일하게 적용합니다. 날짜의 연도는 왼쪽 대상 연도를 따릅니다.</p>
 <div id="dailyNote" class="caption" style="margin:10px 0">저장된 공식 일자료로 시계열을 생성할 수 있습니다.</div>
 <div id="dailyGrid" class="daily-grid"><div class="empty" style="grid-column:1/-1">‘시계열 4장 생성’을 눌러 주세요.</div></div>
 </section>
@@ -460,122 +484,145 @@ function refresh(){
  STORE.result=yrows.length?{rows:yrows,settings,chart:document.getElementById('figure')?.outerHTML}:null;
 }
 
-/* Official daily SST comparison: baseline ten years + target year, four regions. */
+/* Custom daily SST: chosen years and configurable multi-year mean. */
+const DAILY_DEFAULT_PALETTE=['#d14e54','#2d69c7','#2f8e6f','#a46bb5','#d39232','#208b9b','#884f40','#879448'];
+function dailyColorValid(v){return /^#[0-9a-f]{6}$/i.test(v);}
+function dailyYearColor(y,target){if(y===target)return '#df3d3d';if(y===target-1)return '#256bd8';return '#c9cecf';}
+function refreshDailyYearPicker(){
+ const root=$('dailyYears');if(!root)return;
+ const prev=new Map([...root.querySelectorAll('.daily-year')].map(node=>[Number(node.dataset.year),{checked:node.querySelector('input[type=checkbox]').checked,color:node.querySelector('input[type=color]').value}]));
+ const years=[...new Set(STORE.records.filter(r=>r.source==='marine'&&Object.prototype.hasOwnProperty.call(MARINE_IDS,String(r.id))&&Number.isFinite(r.sst)).map(r=>r.year))].sort((a,b)=>a-b);
+ const target=Number($('year').value);
+ root.replaceChildren();
+ if(!years.length){const item=document.createElement('span');item.className='caption';item.textContent='관측자료를 불러오면 선택 가능한 연도가 표시됩니다.';root.append(item);return;}
+ for(const yr of years){
+  const wrap=document.createElement('div');wrap.className='daily-year';wrap.dataset.year=String(yr);
+  const label=document.createElement('label');const cb=document.createElement('input');cb.type='checkbox';
+  cb.checked=prev.has(yr)?prev.get(yr).checked:yr===target||yr===target-1;
+  const txt=document.createElement('span');txt.textContent=String(yr);label.append(cb,txt);
+  const color=document.createElement('input');color.type='color';color.title=yr+'년 시계열 색상';color.setAttribute('aria-label',yr+'년 선 색상');
+  color.value=prev.has(yr)?prev.get(yr).color:dailyYearColor(yr,target);
+  wrap.append(label,color);root.append(wrap);
+ }
+}
+function dailySelectedYears(){
+ return [...$('dailyYears').querySelectorAll('.daily-year')].filter(node=>node.querySelector('input[type=checkbox]').checked).map(node=>({year:Number(node.dataset.year),color:node.querySelector('input[type=color]').value})).sort((a,b)=>a.year-b.year);
+}
 function dailySstData(){
-  if(!STORE.records.length)throw new Error('공식 CSV를 먼저 불러와 주세요.');
-  const target=Number($('year').value);
-  if(!Number.isInteger(target)||target<2000||target>2100)throw new Error('대상 연도를 확인해 주세요.');
-  const dateFrom=$('dailyDateFrom').value,dateTo=$('dailyDateTo').value;
-  const isValidDate=s=>/^\d{4}-\d{2}-\d{2}$/.test(s)&&!Number.isNaN(Date.parse(s))&&new Date(s+'T00:00:00').toLocaleDateString('sv-SE')===s;
-  if(!isValidDate(dateFrom)||!isValidDate(dateTo))throw new Error('시작일과 종료일을 올바르게 지정해 주세요.');
-  if(!dateFrom.startsWith(String(target)+'-')||!dateTo.startsWith(String(target)+'-'))throw new Error('시작일·종료일의 연도가 대상 연도와 같아야 합니다.');
-  if(dateFrom>dateTo)throw new Error('시작일은 종료일보다 늦을 수 없습니다.');
-  const startMd=dateFrom.slice(5),endMd=dateTo.slice(5);
-  const days=[];let dayCursor=new Date(dateFrom+'T12:00:00'),lastDay=new Date(dateTo+'T12:00:00');
-  while(dayCursor<=lastDay){days.push(String(dayCursor.getMonth()+1).padStart(2,'0')+'-'+String(dayCursor.getDate()).padStart(2,'0'));dayCursor.setDate(dayCursor.getDate()+1);}
-  const prior=Array.from({length:10},(_,i)=>target-10+i), years=[...prior,target];
-  const ids=new Set(Object.keys(MARINE_IDS));
-  // Fixed official 17-station selection; optional additional buoys must not change official series.
-  const {rows}=normalizedRows(), stDay=new Map();
-  for(const r of rows){
-    if(r.source!=='marine'||!ids.has(String(r.stationKey))||!years.includes(r.year)||
-       !Number.isFinite(r.sst)||r.date.slice(5,10)<startMd||r.date.slice(5,10)>endMd)continue;
-    const md=r.date.slice(5,10),key=[r.year,r.region,md,r.stationKey].join('|');
-    const item=stDay.get(key)||{sum:0,n:0,year:r.year,region:r.region,md};
-    item.sum+=r.sst;item.n++;stDay.set(key,item);
-  }
-  const regionValues=new Map();
-  for(const o of stDay.values()){
-    const key=[o.year,o.region,o.md].join('|'),arr=regionValues.get(key)||[];
-    arr.push(o.sum/o.n);regionValues.set(key,arr);
-  }
-  const values=new Map();
-  for(const [key,arr] of regionValues)values.set(key,mean(arr));
-  // Equal weight across all three seas. A missing regional daily mean remains missing.
-  for(const year of years)for(const md of days){
-    const seas=['서해','남해','동해'].map(reg=>values.get([year,reg,md].join('|')));
-    if(seas.every(Number.isFinite))values.set([year,'우리나라 주변 해역',md].join('|'),mean(seas));
-  }
-  const counts=Object.fromEntries(years.map(y=>[y,days.filter(md=>Number.isFinite(values.get([y,'우리나라 주변 해역',md].join('|')))).length]));
-  if(!counts[target])throw new Error(target+'년 '+dateFrom+' ~ '+dateTo+' 기간에 유효 관측자료가 없습니다.');
-  const byRegion={};
-  for(const reg of ['우리나라 주변 해역','서해','남해','동해']){
-    const lines=Object.fromEntries(years.map(y=>[y,days.map(md=>values.get([y,reg,md].join('|'))??null)]));
-    const avg=days.map((md,i)=>{const vals=prior.map(y=>lines[y][i]).filter(Number.isFinite);return vals.length?mean(vals):null;});
-    byRegion[reg]={lines,avg};
-  }
-  return {target,prior,years,days,byRegion,counts,dateFrom,dateTo};
+ if(!STORE.records.length)throw new Error('공식 CSV를 먼저 불러와 주세요.');
+ const target=Number($('year').value);
+ const avgStart=Number($('dailyAvgStart').value),avgEnd=Number($('dailyAvgEnd').value);
+ if(!Number.isInteger(target)||target<1900||target>2100)throw new Error('대상 연도를 확인해 주세요.');
+ if(!Number.isInteger(avgStart)||!Number.isInteger(avgEnd)||avgStart<1900||avgEnd>2100||avgStart>avgEnd)throw new Error('평균 시작연도와 종료연도를 확인해 주세요.');
+ if(avgEnd-avgStart>100)throw new Error('평균 기준기간은 최대 101개년까지 선택할 수 있습니다.');
+ const selected=dailySelectedYears();
+ const avgColor=$('dailyAvgColor').value;
+ if(!dailyColorValid(avgColor)||selected.some(x=>!dailyColorValid(x.color)))throw new Error('선 색상 입력값을 확인해 주세요.');
+ const dateFrom=$('dailyDateFrom').value,dateTo=$('dailyDateTo').value;
+ function validDate(txt){if(!/^\d{4}-\d{2}-\d{2}$/.test(txt))return false;const d=new Date(txt+'T12:00:00');return d.getFullYear()===Number(txt.slice(0,4))&&d.getMonth()+1===Number(txt.slice(5,7))&&d.getDate()===Number(txt.slice(8,10));}
+ if(!validDate(dateFrom)||!validDate(dateTo))throw new Error('시작일·종료일을 올바르게 입력해 주세요.');
+ if(!dateFrom.startsWith(target+'-')||!dateTo.startsWith(target+'-'))throw new Error('날짜의 연도는 왼쪽 대상 연도와 일치해야 합니다.');
+ if(dateFrom>dateTo)throw new Error('시작일이 종료일보다 늦습니다.');
+ const days=[],cursor=new Date(dateFrom+'T12:00:00'),last=new Date(dateTo+'T12:00:00');
+ while(cursor<=last){days.push(String(cursor.getMonth()+1).padStart(2,'0')+'-'+String(cursor.getDate()).padStart(2,'0'));cursor.setDate(cursor.getDate()+1);}
+ const avgYears=Array.from({length:avgEnd-avgStart+1},(_,i)=>avgStart+i);
+ const years=[...new Set([...avgYears,...selected.map(s=>s.year)])].sort((a,b)=>a-b);
+ const ids=new Set(Object.keys(MARINE_IDS)),yearSet=new Set(years),daySet=new Set(days);
+ const stDay=new Map(),{rows}=normalizedRows();
+ for(const r of rows){
+  if(r.source!=='marine'||!ids.has(String(r.stationKey))||!yearSet.has(r.year)||!Number.isFinite(r.sst))continue;
+  const md=r.date.slice(5,10);if(!daySet.has(md))continue;
+  const key=[r.year,r.region,md,r.stationKey].join('|');
+  const cell=stDay.get(key)||{n:0,sum:0,year:r.year,region:r.region,md};
+  cell.sum+=r.sst;cell.n++;stDay.set(key,cell);
+ }
+ const grouped=new Map();
+ for(const p of stDay.values()){const k=[p.year,p.region,p.md].join('|'),a=grouped.get(k)||[];a.push(p.sum/p.n);grouped.set(k,a);}
+ const values=new Map();for(const [k,a] of grouped)values.set(k,mean(a));
+ // Whole-sea mean uses the three individual daily regional means equally; missing region => missing whole-sea value.
+ for(const year of years)for(const md of days){
+  const a=['서해','남해','동해'].map(reg=>values.get([year,reg,md].join('|')));
+  if(a.every(Number.isFinite))values.set([year,'우리나라 주변 해역',md].join('|'),mean(a));
+ }
+ const byRegion={},regions=['우리나라 주변 해역','서해','남해','동해'];
+ let avgValid=0,selectedValid=0;
+ for(const reg of regions){
+  const lines=Object.fromEntries(selected.map(s=>[s.year,days.map(md=>values.get([s.year,reg,md].join('|'))??null)]));
+  const meanLine=days.map(md=>{const arr=avgYears.map(y=>values.get([y,reg,md].join('|'))).filter(Number.isFinite);return arr.length?mean(arr):null;});
+  byRegion[reg]={lines,avg:meanLine};
+ }
+ avgValid=byRegion['우리나라 주변 해역'].avg.filter(Number.isFinite).length;
+ selectedValid=selected.reduce((total,s)=>total+byRegion['우리나라 주변 해역'].lines[s.year].filter(Number.isFinite).length,0);
+ if(!avgValid&&!selectedValid)throw new Error('선택한 기준기간과 연도에 유효한 해수면온도 자료가 없습니다.');
+ return {target,avgStart,avgEnd,avgYears,avgColor,selected,years,days,byRegion,dateFrom,dateTo};
 }
 function dailySstSvg(region,model){
- const w=940,h=345,left=60,right=910,top=38,bottom=263,days=model.days;
- const data=model.byRegion[region],valid=[];
- for(const y of model.years)for(const v of data.lines[y])if(Number.isFinite(v))valid.push(v);
- for(const v of data.avg)if(Number.isFinite(v))valid.push(v);
- const vmin=Math.min(...valid),vmax=Math.max(...valid),span=Math.max(vmax-vmin,1.0),lo=vmin-.1*span,hi=vmax+.1*span;
- const x=i=>left+(right-left)*i/Math.max(1,days.length-1), y=v=>bottom-(v-lo)*(bottom-top)/(hi-lo);
+ const w=940,left=60,right=910,top=38,bottom=263,days=model.days;
+ const data=model.byRegion[region],valid=[...data.avg.filter(Number.isFinite)];
+ for(const item of model.selected)valid.push(...data.lines[item.year].filter(Number.isFinite));
+ const vmin=valid.length?Math.min(...valid):0,vmax=valid.length?Math.max(...valid):1,span=Math.max(vmax-vmin,1),lo=vmin-.1*span,hi=vmax+.1*span;
+ const x=i=>left+(right-left)*i/Math.max(1,days.length-1),y=v=>bottom-(v-lo)*(bottom-top)/(hi-lo);
  const escSvg=v=>String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
  function paths(a,color,width,opacity){
-   const blocks=[];let current=[];
-   function flush(){if(current.length){blocks.push('<path d="'+current.join(' ')+'" stroke="'+color+'" stroke-width="'+width+'" opacity="'+opacity+'" fill="none" stroke-linecap="round" stroke-linejoin="round"/>');current=[];}}
-   a.forEach((v,i)=>{if(Number.isFinite(v))current.push((current.length?'L':'M')+x(i).toFixed(2)+','+y(v).toFixed(2));else flush();});
-   flush();return blocks.join('');
+  const blocks=[];let current=[];
+  function flush(){if(current.length){blocks.push('<path d="'+current.join(' ')+'" stroke="'+color+'" stroke-width="'+width+'" opacity="'+opacity+'" fill="none" stroke-linecap="round" stroke-linejoin="round"/>');current=[];}}
+  a.forEach((v,i)=>{if(Number.isFinite(v))current.push((current.length?'L':'M')+x(i).toFixed(2)+','+y(v).toFixed(2));else flush();});
+  flush();return blocks.join('');
  }
- const grid=Array.from({length:6},(_,i)=>lo+(hi-lo)*i/5).map(v=>
-   '<line x1="'+left+'" y1="'+y(v)+'" x2="'+right+'" y2="'+y(v)+'" stroke="#e6ecea"/>'+
-   '<text x="'+(left-9)+'" y="'+(y(v)+4)+'" fill="#627079" font-size="12" text-anchor="end">'+v.toFixed(1)+'</text>').join('');
- const tickStep=Math.max(1,Math.ceil((days.length-1)/10)),tickIndices=[];
- for(let i=0;i<days.length;i+=tickStep)tickIndices.push(i);
- if(tickIndices[tickIndices.length-1]!==days.length-1)tickIndices.push(days.length-1);
- const ticks=tickIndices.map(i=>'<text x="'+x(i)+'" y="'+(bottom+20)+'" font-size="12" fill="#627079" text-anchor="middle">'+days[i]+'</text>').join('');
- const gray=model.prior.filter(yr=>yr!==model.target-1).map(yr=>paths(data.lines[yr],'#c9cecf',1.5,0.88)).join('');
- const prev=paths(data.lines[model.target-1]||[],'#256bd8',2.6,1);
- const current=paths(data.lines[model.target]||[],'#df3d3d',3,1);
- const average=paths(data.avg,'#171b20',2.6,1);
- const legend=[['과거 9개년','#c9cecf'],[String(model.target-1),'#256bd8'],[String(model.target),'#df3d3d'],[model.prior[0]+'–'+model.prior[9]+' 평균','#171b20']];
- const legends=legend.map((el,i)=>{const bx=left+i*210;return '<line x1="'+bx+'" x2="'+(bx+26)+'" y1="317" y2="317" stroke="'+el[1]+'" stroke-width="3"/><text x="'+(bx+34)+'" y="322" font-size="13" fill="#34444a">'+escSvg(el[0])+'</text>';}).join('');
- return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="'+escSvg(region+' 일별 해수면온도')+'"><rect width="'+w+'" height="'+h+'" fill="#fff"/>'+
+ const grid=Array.from({length:6},(_,i)=>lo+(hi-lo)*i/5).map(v=>'<line x1="'+left+'" y1="'+y(v)+'" x2="'+right+'" y2="'+y(v)+'" stroke="#e6ecea"/><text x="'+(left-9)+'" y="'+(y(v)+4)+'" fill="#627079" font-size="12" text-anchor="end">'+v.toFixed(1)+'</text>').join('');
+ const step=Math.max(1,Math.ceil((days.length-1)/10)),tickIdx=[];
+ for(let i=0;i<days.length;i+=step)tickIdx.push(i);
+ if(tickIdx[tickIdx.length-1]!==days.length-1)tickIdx.push(days.length-1);
+ const ticks=tickIdx.map(i=>'<text x="'+x(i)+'" y="'+(bottom+20)+'" font-size="12" fill="#627079" text-anchor="middle">'+days[i]+'</text>').join('');
+ const lines=model.selected.map(item=>paths(data.lines[item.year],item.color,2.5,1)).join('');
+ const avg=paths(data.avg,model.avgColor,3,1);
+ const legend=[...model.selected.map(o=>[String(o.year),o.color]),[model.avgStart+'–'+model.avgEnd+' 평균',model.avgColor]];
+ const legendCols=4,legendRowHeight=24,legendRows=Math.max(1,Math.ceil(legend.length/legendCols));
+ const legendStart=302,height=legendStart+legendRows*legendRowHeight+12;
+ const legends=legend.map((entry,i)=>{const col=i%legendCols,row=Math.floor(i/legendCols),lx=left+col*210,ly=legendStart+row*legendRowHeight;return '<line x1="'+lx+'" x2="'+(lx+26)+'" y1="'+ly+'" y2="'+ly+'" stroke="'+entry[1]+'" stroke-width="3"/><text x="'+(lx+34)+'" y="'+(ly+5)+'" font-size="12" fill="#34444a">'+escSvg(entry[0])+'</text>';}).join('');
+ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+w+' '+height+'" role="img" aria-label="'+escSvg(region+' 일별 해수면온도')+'"><rect width="'+w+'" height="'+height+'" fill="#fff"/>'+
  '<text x="'+left+'" y="23" font-size="18" fill="#19323b" font-weight="700">'+escSvg(region)+'</text>'+
  '<text x="'+right+'" y="23" font-size="12" fill="#627079" text-anchor="end">해수면온도 (℃) · '+model.dateFrom.slice(5)+' ~ '+model.dateTo.slice(5)+'</text>'+
- grid+'<line x1="'+left+'" y1="'+bottom+'" x2="'+right+'" y2="'+bottom+'" stroke="#aeb7b6"/>'+
- ticks+gray+prev+current+average+legends+'</svg>';
+ grid+'<line x1="'+left+'" y1="'+bottom+'" x2="'+right+'" y2="'+bottom+'" stroke="#aeb7b6"/>'+ticks+lines+avg+legends+'</svg>';
 }
 function makeDailySst(){
  try{
   const model=dailySstData(),names=['우리나라 주변 해역','서해','남해','동해'];
-  const grid=$('dailyGrid');grid.innerHTML='';
+  const grid=$('dailyGrid');grid.replaceChildren();
   for(const name of names){
-    const card=document.createElement('article');card.className='daily-card';
-    const head=document.createElement('div');head.className='daily-card-head';
-    const strong=document.createElement('strong');strong.textContent=name;head.appendChild(strong);
-    const btn=document.createElement('button');btn.className='secondary';btn.textContent='SVG 다운로드';
-    const svg=dailySstSvg(name,model);
-    btn.onclick=()=>dl('daily_sst_'+name.replace(/\s/g,'_')+'_'+model.dateFrom+'_'+model.dateTo+'.svg',svg,'image/svg+xml;charset=utf-8');
-    head.appendChild(btn);card.appendChild(head);card.insertAdjacentHTML('beforeend',svg);grid.appendChild(card);
+   const card=document.createElement('article');card.className='daily-card';
+   const head=document.createElement('div');head.className='daily-card-head';
+   const strong=document.createElement('strong');strong.textContent=name;head.append(strong);
+   const btn=document.createElement('button');btn.className='secondary';btn.textContent='SVG 다운로드';
+   const svg=dailySstSvg(name,model);
+   btn.onclick=()=>dl('daily_sst_'+name.replace(/\s/g,'_')+'_'+model.dateFrom+'_'+model.dateTo+'.svg',svg,'image/svg+xml;charset=utf-8');
+   head.append(btn);card.append(head);card.insertAdjacentHTML('beforeend',svg);grid.append(card);
   }
-  $('dailyNote').textContent='공식 기준 17개 부이 · '+model.dateFrom+' ~ '+model.dateTo+' ('+model.days.length+'일) · 이전 '+model.prior[0]+'–'+model.prior[9]+'년 평균 · 대상연도 유효 '+model.counts[model.target]+'/'+model.days.length+'일 · 없는 관측값은 선을 끊어 표시합니다.';
+  $('dailyNote').textContent='공식 기준 17개 부이 · '+model.dateFrom+' ~ '+model.dateTo+' ('+model.days.length+'일) · 평균 '+model.avgStart+'–'+model.avgEnd+'년 · 개별 선택 '+(model.selected.map(o=>o.year).join(', ')||'없음')+' · 결측은 선이 끊겨 표시됩니다.';
   $('dailyCsv').disabled=false;STORE.dailySst=model;
- }catch(e){$('dailyNote').textContent='시계열 생성 불가: '+e.message; $('dailyCsv').disabled=true;STORE.dailySst=null;}
+ }catch(e){$('dailyNote').textContent='시계열 생성 불가: '+e.message;$('dailyCsv').disabled=true;STORE.dailySst=null;}
 }
 function downloadDailySstCsv(){
  const m=STORE.dailySst;if(!m)return;
- const headers=['해역','월일',...m.years.map(String),m.prior[0]+'-'+m.prior[9]+' 평균'];
+ const headers=['해역','월일',...m.selected.map(o=>String(o.year)),m.avgStart+'-'+m.avgEnd+' 평균'];
  const rr=[];
  for(const reg of ['우리나라 주변 해역','서해','남해','동해'])for(let i=0;i<m.days.length;i++){
-  rr.push([reg,m.days[i],...m.years.map(yr=>m.byRegion[reg].lines[yr][i]),m.byRegion[reg].avg[i]].map(v=>typeof v==='number'?(Number.isFinite(v)?v.toFixed(5):''):v??''));
+  rr.push([reg,m.days[i],...m.selected.map(o=>m.byRegion[reg].lines[o.year][i]),m.byRegion[reg].avg[i]].map(v=>typeof v==='number'?(Number.isFinite(v)?v.toFixed(5):''):v??''));
  }
  dl('daily_sst_'+m.dateFrom+'_'+m.dateTo+'.csv',dCsv(headers,rr),'text/csv;charset=utf-8');
 }
 $('year').addEventListener('change',()=>{
-  const target=Number($('year').value);
-  if(!Number.isInteger(target)||target<2000||target>2100)return;
-  for(const id of ['dailyDateFrom','dailyDateTo']){
-    const el=$(id);const md=el.value.slice(5);if(!md)continue;
-    const date=target+'-'+md;
-    const probe=new Date(date+'T12:00:00');
-    if(probe.getFullYear()===target&&probe.getMonth()+1===Number(md.slice(0,2))&&probe.getDate()===Number(md.slice(3,5)))el.value=date;
-    else el.value=target+'-02-28';
-  }
+ const target=Number($('year').value);
+ if(!Number.isInteger(target)||target<2000||target>2100)return;
+ for(const id of ['dailyDateFrom','dailyDateTo']){
+  const el=$(id),md=el.value.slice(5);if(!md)continue;
+  const str=target+'-'+md,dt=new Date(str+'T12:00:00');
+  el.value=(dt.getFullYear()===target&&dt.getMonth()+1===Number(md.slice(0,2))&&dt.getDate()===Number(md.slice(3,5)))?str:target+'-02-28';
+ }
+ refreshDailyYearPicker();
 });
+$('dailySelectAll').onclick=()=>{for(const el of $('dailyYears').querySelectorAll('input[type=checkbox]'))el.checked=true;};
+$('dailySelectNone').onclick=()=>{for(const el of $('dailyYears').querySelectorAll('input[type=checkbox]'))el.checked=false;};
 $('dailyMake').onclick=makeDailySst;
 $('dailyCsv').onclick=downloadDailySstCsv;
 
@@ -627,7 +674,7 @@ function updateView(message=''){
  const old=STORE.stationSelections;
  STORE.normalized=stationData(); STORE.duplicated=STORE.normalized.duplicated;makeStationCatalog();
  for(const src of ['marine','coastal'])if(old[src]!==null){const allowed=new Set(STORE.stationCatalog[src].map(s=>s.id));STORE.stationSelections[src]=new Set([...old[src]].filter(id=>allowed.has(id)));}
- renderStationPicker();
+ renderStationPicker();refreshDailyYearPicker();
  try{refresh();}catch(e){$('status').textContent='통계 계산 오류: '+e.message;}
 }
 async function loadBaseline(){
