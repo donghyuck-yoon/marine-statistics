@@ -109,7 +109,7 @@ main > aside, main > div, main section, .panel, #tableSlot, #chartSlot {min-widt
 </style>
 </head>
 <body>
-<header><div><div class="eyebrow">MARINE CLIMATE / STATISTICS</div><h1>해양관측 통계 분석실</h1><p>공식 일자료 보관 · 필요할 때 CSV 추가 갱신 · 지점 선택 · 월별 / 계절별 통계</p></div><span class="version">VERSION 1.4 · ANALYSIS TABS</span></header>
+<header><div><div class="eyebrow">MARINE CLIMATE / STATISTICS</div><h1>해양관측 통계 분석실</h1><p>공식 일자료 보관 · 필요할 때 CSV 추가 갱신 · 지점 선택 · 월별 / 계절별 통계</p></div><span class="version">VERSION 1.5 · INTEGER Y-AXIS</span></header>
 <nav class="stat-tabs" aria-label="분석 화면 선택">
 <button type="button" class="stat-tab active" id="tabStatistics" role="tab" aria-selected="true" aria-controls="statisticsTabPanel">월별·계절별 통계</button>
 <button type="button" class="stat-tab" id="tabDaily" role="tab" aria-selected="false" aria-controls="dailyTabPanel">일별 해수면온도 시계열</button>
@@ -588,7 +588,13 @@ function dailySstSvg(region,model){
  const w=940,left=60,right=910,top=38,bottom=263,days=model.days;
  const data=model.byRegion[region],valid=[...data.avg.filter(Number.isFinite)];
  for(const item of model.selected)valid.push(...data.lines[item.year].filter(Number.isFinite));
- const vmin=valid.length?Math.min(...valid):0,vmax=valid.length?Math.max(...valid):1,span=Math.max(vmax-vmin,1),lo=vmin-.1*span,hi=vmax+.1*span;
+ const vmin=valid.length?Math.min(...valid):0,vmax=valid.length?Math.max(...valid):1;
+ // Integer-only Y-axis ticks; choose a readable 1, 2, 5, 10... degree interval.
+ const desired=Math.max(1,(vmax-vmin)/5);
+ const power=Math.pow(10,Math.floor(Math.log10(desired)));
+ const tickSize=[1,2,5,10].map(m=>m*power).find(step=>step>=desired)||10*power;
+ let lo=Math.floor(vmin/tickSize)*tickSize,hi=Math.ceil(vmax/tickSize)*tickSize;
+ if(hi<=lo){lo-=tickSize;hi+=tickSize;}
  const x=i=>left+(right-left)*i/Math.max(1,days.length-1),y=v=>bottom-(v-lo)*(bottom-top)/(hi-lo);
  const escSvg=v=>String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
  function paths(a,color,width,opacity){
@@ -597,7 +603,8 @@ function dailySstSvg(region,model){
   a.forEach((v,i)=>{if(Number.isFinite(v))current.push((current.length?'L':'M')+x(i).toFixed(2)+','+y(v).toFixed(2));else flush();});
   flush();return blocks.join('');
  }
- const grid=Array.from({length:6},(_,i)=>lo+(hi-lo)*i/5).map(v=>'<line x1="'+left+'" y1="'+y(v)+'" x2="'+right+'" y2="'+y(v)+'" stroke="#e6ecea"/><text x="'+(left-9)+'" y="'+(y(v)+4)+'" fill="#627079" font-size="12" text-anchor="end">'+v.toFixed(1)+'</text>').join('');
+ const yTickCount=Math.round((hi-lo)/tickSize);
+ const grid=Array.from({length:yTickCount+1},(_,i)=>lo+i*tickSize).map(v=>'<line x1="'+left+'" y1="'+y(v)+'" x2="'+right+'" y2="'+y(v)+'" stroke="#e6ecea"/><text x="'+(left-9)+'" y="'+(y(v)+4)+'" fill="#627079" font-size="12" text-anchor="end">'+Math.round(v)+'</text>').join('');
  const step=Math.max(1,Math.ceil((days.length-1)/10)),tickIdx=[];
  for(let i=0;i<days.length;i+=step)tickIdx.push(i);
  if(tickIdx[tickIdx.length-1]!==days.length-1)tickIdx.push(days.length-1);
