@@ -115,7 +115,7 @@ main > aside, main > div, main section, .panel, #tableSlot, #chartSlot {min-widt
 </style>
 </head>
 <body>
-<header><div><div class="eyebrow">MARINE CLIMATE / STATISTICS</div><h1>해양관측 통계 분석실</h1><p>공식 일자료 보관 · 필요할 때 CSV 추가 갱신 · 지점 선택 · 월별 / 계절별 통계</p></div><span class="version">VERSION 1.7 · OVERLAY BARS</span></header>
+<header><div><div class="eyebrow">MARINE CLIMATE / STATISTICS</div><h1>해양관측 통계 분석실</h1><p>공식 일자료 보관 · 필요할 때 CSV 추가 갱신 · 지점 선택 · 월별 / 계절별 통계</p></div><span class="version">VERSION 1.8 · CHECKBOX FIX</span></header>
 <nav class="stat-tabs" aria-label="분석 화면 선택">
 <button type="button" class="stat-tab active" id="tabStatistics" role="tab" aria-selected="true" aria-controls="statisticsTabPanel">월별·계절별 통계</button>
 <button type="button" class="stat-tab" id="tabDaily" role="tab" aria-selected="false" aria-controls="dailyTabPanel">일별 해수면온도 시계열</button>
@@ -186,6 +186,7 @@ main > aside, main > div, main section, .panel, #tableSlot, #chartSlot {min-widt
 </div>
 <p class="caption">해양기상부이 공식 17개 지점 고정 · 우리나라 주변 해역, 서해, 남해, 동해 총 4개 그래프. 선택한 날짜 범위를 각 연도에 동일하게 적용합니다. 날짜의 연도는 이 탭의 대상 연도를 따릅니다.</p>
 <div id="dailyNote" class="caption" style="margin:10px 0">저장된 공식 일자료로 시계열을 생성할 수 있습니다.</div>
+<div id="dailyGaps" class="caption" style="margin:5px 0 13px" aria-live="polite">결측 안내: 한 해역에서 일부 부이만 결측이면 나머지 유효 지점으로 평균합니다. 해당 해역의 모든 부이가 결측이면 그날은 시계열을 끊어 표시합니다. 기준기간 평균은 유효한 연도만 사용하며 보간하지 않습니다.</div>
 <div id="dailyGrid" class="daily-grid"><div class="empty" style="grid-column:1/-1">‘시계열 4장 생성’을 눌러 주세요.</div></div>
 </section></div></div>
 <script>
@@ -683,8 +684,17 @@ function makeDailySst(){
    head.append(btn);card.append(head);card.insertAdjacentHTML('beforeend',svg);grid.append(card);
   }
   $('dailyNote').textContent='공식 기준 17개 부이 · '+model.dateFrom+' ~ '+model.dateTo+' ('+model.days.length+'일) · 평균 '+model.avgStart+'–'+model.avgEnd+'년 · 개별 선택 '+(model.selected.map(o=>o.year).join(', ')||'없음')+' · 결측은 선이 끊겨 표시됩니다.';
+  const miss=[];
+  for(const item of model.selected){
+   for(const reg of ['우리나라 주변 해역','서해','남해','동해']){
+    const series=model.byRegion[reg].lines[item.year];
+    const dates=model.days.filter((day,i)=>!Number.isFinite(series[i]));
+    if(dates.length)miss.push(item.year+'년 '+reg+': '+dates.length+'일 결측 ('+dates.slice(0,3).join(', ')+(dates.length>3?' 외':'')+')');
+   }
+  }
+  $('dailyGaps').textContent=(miss.length?'해역 평균 결측: '+miss.slice(0,10).join(' · ')+(miss.length>10?' · 기타 '+(miss.length-10)+'건':''):'선택 연도에서 해당 기간의 해역 평균이 모두 계산되었습니다.')+' · 일부 부이만 결측이면 유효 지점으로 평균하며, 모든 지점이 결측인 해역은 선을 끊습니다. 기준기간 평균은 유효 연도만 사용합니다.';
   $('dailyCsv').disabled=false;STORE.dailySst=model;
- }catch(e){$('dailyNote').textContent='시계열 생성 불가: '+e.message;$('dailyCsv').disabled=true;STORE.dailySst=null;}
+ }catch(e){$('dailyNote').textContent='시계열 생성 불가: '+e.message;$('dailyGaps').textContent='';$('dailyCsv').disabled=true;STORE.dailySst=null;}
 }
 function downloadDailySstCsv(){
  const m=STORE.dailySst;if(!m)return;
@@ -707,8 +717,24 @@ $('dailyTargetYear').addEventListener('change',()=>{
  }
  refreshDailyYearPicker();
 });
-$('dailySelectAll').onclick=()=>{for(const el of $('dailyYears').querySelectorAll('input[type=checkbox]'))el.checked=true;};
-$('dailySelectNone').onclick=()=>{for(const el of $('dailyYears').querySelectorAll('input[type=checkbox]'))el.checked=false;};
+$('dailySelectAll').onclick=()=>{
+ for(const node of $('dailyYears').querySelectorAll('.daily-year')){
+  const year=node.querySelector('.daily-year-main input[type=checkbox]');
+  const bar=node.querySelector('input.daily-anomaly');
+  year.checked=true;
+  bar.disabled=false;
+  bar.checked=true;
+ }
+};
+$('dailySelectNone').onclick=()=>{
+ for(const node of $('dailyYears').querySelectorAll('.daily-year')){
+  const year=node.querySelector('.daily-year-main input[type=checkbox]');
+  const bar=node.querySelector('input.daily-anomaly');
+  year.checked=false;
+  bar.checked=false;
+  bar.disabled=true;
+ }
+};
 $('dailyMake').onclick=makeDailySst;
 $('dailyCsv').onclick=downloadDailySstCsv;
 
