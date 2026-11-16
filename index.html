@@ -94,11 +94,27 @@ main > aside, main > div, main section, .panel, #tableSlot, #chartSlot {min-widt
 .daily-year input[type=color]{width:37px;height:30px}
 @media(max-width:480px){.daily-config-row label{flex:1}.daily-config-row input[type=number]{width:100%}}
 @media(max-width:1040px){.daily-grid{grid-template-columns:1fr}}
+
+/* Main analysis tabs: the official-data store and statistics remain in the same page. */
+.stat-tabs{max-width:1280px;margin:24px auto 0;padding:0 20px;display:flex;gap:8px;border-bottom:1px solid var(--line)}
+.stat-tab{border:1px solid var(--line);border-bottom:0;background:#eef1ef;color:#40545a;padding:13px 20px;border-radius:5px 5px 0 0;font-size:14px;font-weight:750;margin:0;cursor:pointer}
+.stat-tab.active{background:#fff;color:#096a68;box-shadow:inset 0 3px #096a68}
+.stat-tab:focus-visible{outline:3px solid #82b5aa;outline-offset:2px}
+#statisticsTabPanel{margin-top:20px}
+#statisticsTabPanel[hidden],#dailyTabPanel[hidden]{display:none!important}
+#dailyTabPanel{max-width:1280px;margin:20px auto 32px;padding:0 20px}
+#dailyTabPanel .daily-tab-inner>.panel{margin:0}
+.daily-range input[type=number]{min-width:125px;max-width:165px;padding:8px 10px;border:1px solid var(--line);border-radius:3px;background:white}
+@media(max-width:620px){.stat-tabs{gap:4px}.stat-tab{padding:12px 10px;font-size:12px;flex:1}.daily-range input[type=number]{max-width:none}}
 </style>
 </head>
 <body>
-<header><div><div class="eyebrow">MARINE CLIMATE / STATISTICS</div><h1>해양관측 통계 분석실</h1><p>공식 일자료 보관 · 필요할 때 CSV 추가 갱신 · 지점 선택 · 월별 / 계절별 통계</p></div><span class="version">VERSION 1.3 · CUSTOM LINES</span></header>
-<main><aside>
+<header><div><div class="eyebrow">MARINE CLIMATE / STATISTICS</div><h1>해양관측 통계 분석실</h1><p>공식 일자료 보관 · 필요할 때 CSV 추가 갱신 · 지점 선택 · 월별 / 계절별 통계</p></div><span class="version">VERSION 1.4 · ANALYSIS TABS</span></header>
+<nav class="stat-tabs" aria-label="분석 화면 선택">
+<button type="button" class="stat-tab active" id="tabStatistics" role="tab" aria-selected="true" aria-controls="statisticsTabPanel">월별·계절별 통계</button>
+<button type="button" class="stat-tab" id="tabDaily" role="tab" aria-selected="false" aria-controls="dailyTabPanel">일별 해수면온도 시계열</button>
+</nav>
+<main id="statisticsTabPanel" role="tabpanel" aria-labelledby="tabStatistics"><aside>
 <h2>01 / 관측자료</h2>
 <div class="caption method-note" style="margin-bottom:12px"><b>저장된 공식 일자료 자동 불러오기</b><div style="margin-top:5px">기존 GitHub 공식 CSV는 사이트 접속 시 자동 로딩됩니다. 새 날짜의 공식 CSV만 직접 올리면 기존 자료와 합쳐 <b>이 브라우저에 저장</b>됩니다. API 시간자료를 이용한 재계산은 하지 않습니다.</div></div>
 <div id="storageInfo" class="caption" style="margin-bottom:11px;padding:10px;border:1px solid #ccdad5;background:#f8faf8" aria-live="polite">저장된 공식자료를 확인하는 중…</div>
@@ -145,9 +161,12 @@ main > aside, main > div, main section, .panel, #tableSlot, #chartSlot {min-widt
 </section>
 <section class="panel"><div class="toolbar"><h2 style="margin:0">해역별 / 지점별 계산 결과</h2><div><button class="secondary" id="downloadCSV" disabled>CSV 내려받기</button><button class="secondary" id="downloadSVG" disabled>그림(SVG) 내려받기</button></div></div><div id="tableSlot" class="empty">표시할 결과가 없습니다.<br>일자료 CSV를 불러와 주세요.</div><p class="foot">표시는 소수 첫째 자리이며, 내부 계산은 반올림 전 수치로 수행합니다. 해당 기간 유효 일자료가 없는 지점·월은 제외합니다. 통계값은 다운로드 시점의 자료 상태에 따라 달라질 수 있습니다.</p></section>
 <section class="panel"><div class="toolbar"><h2 style="margin:0">연도별 변화</h2><span class="pill" id="chartLabel">전해역</span></div><div id="chartSlot" class="empty">연도별 그래프가 여기에 표시됩니다.</div></section>
-<section class="panel" id="dailySstPanel">
+
+<section class="panel"><h2>지점 구성 · 유효성</h2><div id="stationInfo" class="caption">해양기상부이 기준 17개 지점은 기본 선택되며 추가 지점은 선택형으로 확장할 수 있습니다. 관측지점정보 2개 CSV(2026.10.21) 기준 지점명·좌표 내장. 연안 전환·신규 13개 후보(신창 포함)를 결합하며 현재 원본에서 72개 고유 지점이 확인됩니다. 해역 분류 일부는 좌표 추정이므로 해역평균은 잠정값입니다.</div><div style="margin-top:14px"><button class="secondary" id="downloadStations" disabled>2025·2026년 지점별 자료 현황 CSV 받기</button></div><div class="divider"></div><p class="foot">기존 공식 CSV는 GitHub Pages에서 읽고, 직접 업로드하는 최신 CSV는 이 브라우저의 로컬 저장소에만 보관합니다. API 또는 서버로 새 CSV를 자동 전송하지 않습니다. 현재는 CSV만 지원하며 Excel(XLSX)은 CSV로 저장해서 불러와야 합니다. 임의 지점, 결측 구간, 변경된 일자료는 계산 결과를 바꿀 수 있습니다.</p></section>
+</div></main>
+<div id="dailyTabPanel" role="tabpanel" aria-labelledby="tabDaily" hidden><div class="daily-tab-inner"><section class="panel" id="dailySstPanel">
 <div class="toolbar"><h2 style="margin:0">일별 해수면온도 비교</h2><div class="daily-actions"><button class="secondary" id="dailyMake">시계열 4장 생성</button><button class="secondary" id="dailyCsv" disabled>일별 자료 CSV</button></div></div>
-<div class="daily-range" role="group" aria-label="시계열 날짜 범위"><label for="dailyDateFrom">시작일<input id="dailyDateFrom" type="date" value="2026-09-01"></label><span class="daily-separator">~</span><label for="dailyDateTo">종료일<input id="dailyDateTo" type="date" value="2026-10-31"></label></div>
+<div class="daily-range" role="group" aria-label="시계열 연도와 날짜 범위"><label for="dailyTargetYear">대상 연도<input id="dailyTargetYear" type="number" min="2000" max="2100" value="2026"></label><label for="dailyDateFrom">시작일<input id="dailyDateFrom" type="date" value="2026-09-01"></label><span class="daily-separator">~</span><label for="dailyDateTo">종료일<input id="dailyDateTo" type="date" value="2026-10-31"></label></div>
 <div class="daily-config">
   <div class="daily-config-header"><strong>평균선 기준연도</strong><span class="caption">기준기간의 각 날짜별 평균을 계산합니다.</span></div>
   <div class="daily-config-row">
@@ -159,12 +178,10 @@ main > aside, main > div, main section, .panel, #tableSlot, #chartSlot {min-widt
   <div id="dailyYears" class="daily-years"><span class="caption">공식자료를 불러오면 보유 연도가 표시됩니다.</span></div>
   <p class="caption" style="margin:9px 0 0">체크한 연도만 시계열에 표시됩니다. 연도별 색상과 평균선 색상을 각각 변경할 수 있으며, SVG·CSV 다운로드에도 반영됩니다.</p>
 </div>
-<p class="caption">해양기상부이 공식 17개 지점 고정 · 우리나라 주변 해역, 서해, 남해, 동해 총 4개 그래프. 선택한 날짜 범위를 각 연도에 동일하게 적용합니다. 날짜의 연도는 왼쪽 대상 연도를 따릅니다.</p>
+<p class="caption">해양기상부이 공식 17개 지점 고정 · 우리나라 주변 해역, 서해, 남해, 동해 총 4개 그래프. 선택한 날짜 범위를 각 연도에 동일하게 적용합니다. 날짜의 연도는 이 탭의 대상 연도를 따릅니다.</p>
 <div id="dailyNote" class="caption" style="margin:10px 0">저장된 공식 일자료로 시계열을 생성할 수 있습니다.</div>
 <div id="dailyGrid" class="daily-grid"><div class="empty" style="grid-column:1/-1">‘시계열 4장 생성’을 눌러 주세요.</div></div>
-</section>
-<section class="panel"><h2>지점 구성 · 유효성</h2><div id="stationInfo" class="caption">해양기상부이 기준 17개 지점은 기본 선택되며 추가 지점은 선택형으로 확장할 수 있습니다. 관측지점정보 2개 CSV(2026.10.21) 기준 지점명·좌표 내장. 연안 전환·신규 13개 후보(신창 포함)를 결합하며 현재 원본에서 72개 고유 지점이 확인됩니다. 해역 분류 일부는 좌표 추정이므로 해역평균은 잠정값입니다.</div><div style="margin-top:14px"><button class="secondary" id="downloadStations" disabled>2025·2026년 지점별 자료 현황 CSV 받기</button></div><div class="divider"></div><p class="foot">기존 공식 CSV는 GitHub Pages에서 읽고, 직접 업로드하는 최신 CSV는 이 브라우저의 로컬 저장소에만 보관합니다. API 또는 서버로 새 CSV를 자동 전송하지 않습니다. 현재는 CSV만 지원하며 Excel(XLSX)은 CSV로 저장해서 불러와야 합니다. 임의 지점, 결측 구간, 변경된 일자료는 계산 결과를 바꿀 수 있습니다.</p></section>
-</div></main>
+</section></div></div>
 <script>
 (()=>{'use strict';
 const MARINE_IDS={"21229":{"name":"울릉도","region":"동해"},"22101":{"name":"덕적도","region":"서해"},"22102":{"name":"칠발도","region":"서해"},"22103":{"name":"거문도","region":"남해"},"22104":{"name":"거제도","region":"남해"},"22105":{"name":"동해","region":"동해"},"22106":{"name":"포항","region":"동해"},"22107":{"name":"마라도","region":"남해"},"22108":{"name":"외연도","region":"서해"},"22183":{"name":"신안","region":"서해"},"22184":{"name":"추자도","region":"남해"},"22185":{"name":"인천","region":"서해"},"22186":{"name":"부안","region":"서해"},"22187":{"name":"서귀포","region":"남해"},"22188":{"name":"통영","region":"남해"},"22189":{"name":"울산","region":"동해"},"22190":{"name":"울진","region":"동해"}};
@@ -484,6 +501,17 @@ function refresh(){
  STORE.result=yrows.length?{rows:yrows,settings,chart:document.getElementById('figure')?.outerHTML}:null;
 }
 
+function switchAnalysisTab(which){
+ const daily=which==='daily';
+ $('statisticsTabPanel').hidden=daily;
+ $('dailyTabPanel').hidden=!daily;
+ $('tabStatistics').classList.toggle('active',!daily);
+ $('tabDaily').classList.toggle('active',daily);
+ $('tabStatistics').setAttribute('aria-selected',String(!daily));
+ $('tabDaily').setAttribute('aria-selected',String(daily));
+}
+$('tabStatistics').onclick=()=>switchAnalysisTab('statistics');
+$('tabDaily').onclick=()=>switchAnalysisTab('daily');
 /* Custom daily SST: chosen years and configurable multi-year mean. */
 const DAILY_DEFAULT_PALETTE=['#d14e54','#2d69c7','#2f8e6f','#a46bb5','#d39232','#208b9b','#884f40','#879448'];
 function dailyColorValid(v){return /^#[0-9a-f]{6}$/i.test(v);}
@@ -492,7 +520,7 @@ function refreshDailyYearPicker(){
  const root=$('dailyYears');if(!root)return;
  const prev=new Map([...root.querySelectorAll('.daily-year')].map(node=>[Number(node.dataset.year),{checked:node.querySelector('input[type=checkbox]').checked,color:node.querySelector('input[type=color]').value}]));
  const years=[...new Set(STORE.records.filter(r=>r.source==='marine'&&Object.prototype.hasOwnProperty.call(MARINE_IDS,String(r.id))&&Number.isFinite(r.sst)).map(r=>r.year))].sort((a,b)=>a-b);
- const target=Number($('year').value);
+ const target=Number($('dailyTargetYear').value);
  root.replaceChildren();
  if(!years.length){const item=document.createElement('span');item.className='caption';item.textContent='관측자료를 불러오면 선택 가능한 연도가 표시됩니다.';root.append(item);return;}
  for(const yr of years){
@@ -510,7 +538,7 @@ function dailySelectedYears(){
 }
 function dailySstData(){
  if(!STORE.records.length)throw new Error('공식 CSV를 먼저 불러와 주세요.');
- const target=Number($('year').value);
+ const target=Number($('dailyTargetYear').value);
  const avgStart=Number($('dailyAvgStart').value),avgEnd=Number($('dailyAvgEnd').value);
  if(!Number.isInteger(target)||target<1900||target>2100)throw new Error('대상 연도를 확인해 주세요.');
  if(!Number.isInteger(avgStart)||!Number.isInteger(avgEnd)||avgStart<1900||avgEnd>2100||avgStart>avgEnd)throw new Error('평균 시작연도와 종료연도를 확인해 주세요.');
@@ -521,7 +549,7 @@ function dailySstData(){
  const dateFrom=$('dailyDateFrom').value,dateTo=$('dailyDateTo').value;
  function validDate(txt){if(!/^\d{4}-\d{2}-\d{2}$/.test(txt))return false;const d=new Date(txt+'T12:00:00');return d.getFullYear()===Number(txt.slice(0,4))&&d.getMonth()+1===Number(txt.slice(5,7))&&d.getDate()===Number(txt.slice(8,10));}
  if(!validDate(dateFrom)||!validDate(dateTo))throw new Error('시작일·종료일을 올바르게 입력해 주세요.');
- if(!dateFrom.startsWith(target+'-')||!dateTo.startsWith(target+'-'))throw new Error('날짜의 연도는 왼쪽 대상 연도와 일치해야 합니다.');
+ if(!dateFrom.startsWith(target+'-')||!dateTo.startsWith(target+'-'))throw new Error('날짜의 연도는 시계열 분석 탭의 대상 연도와 일치해야 합니다.');
  if(dateFrom>dateTo)throw new Error('시작일이 종료일보다 늦습니다.');
  const days=[],cursor=new Date(dateFrom+'T12:00:00'),last=new Date(dateTo+'T12:00:00');
  while(cursor<=last){days.push(String(cursor.getMonth()+1).padStart(2,'0')+'-'+String(cursor.getDate()).padStart(2,'0'));cursor.setDate(cursor.getDate()+1);}
@@ -611,8 +639,8 @@ function downloadDailySstCsv(){
  }
  dl('daily_sst_'+m.dateFrom+'_'+m.dateTo+'.csv',dCsv(headers,rr),'text/csv;charset=utf-8');
 }
-$('year').addEventListener('change',()=>{
- const target=Number($('year').value);
+$('dailyTargetYear').addEventListener('change',()=>{
+ const target=Number($('dailyTargetYear').value);
  if(!Number.isInteger(target)||target<2000||target>2100)return;
  for(const id of ['dailyDateFrom','dailyDateTo']){
   const el=$(id),md=el.value.slice(5);if(!md)continue;
