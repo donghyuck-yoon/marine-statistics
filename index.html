@@ -116,7 +116,7 @@ main > aside, main > div, main section, .panel, #tableSlot, #chartSlot {min-widt
 </style>
 </head>
 <body>
-<header><div><div class="eyebrow">MARINE CLIMATE / STATISTICS</div><h1>해양관측 통계 분석실</h1><p>공식 일자료 보관 · 필요할 때 CSV 추가 갱신 · 지점 선택 · 월별 / 계절별 통계</p></div><span class="version">VERSION 1.15 · PRIOR-YEAR COLOR</span></header>
+<header><div><div class="eyebrow">MARINE CLIMATE / STATISTICS</div><h1>해양관측 통계 분석실</h1><p>공식 일자료 보관 · 필요할 때 CSV 추가 갱신 · 지점 선택 · 월별 / 계절별 통계</p></div><span class="version">VERSION 1.16 · LATEST OBSERVATION DATES</span></header>
 <nav class="stat-tabs" aria-label="분석 화면 선택">
 <button type="button" class="stat-tab active" id="tabStatistics" role="tab" aria-selected="true" aria-controls="statisticsTabPanel">월별·계절별 통계</button>
 <button type="button" class="stat-tab" id="tabDaily" role="tab" aria-selected="false" aria-controls="dailyTabPanel">일별 해수면온도 시계열</button>
@@ -173,7 +173,7 @@ main > aside, main > div, main section, .panel, #tableSlot, #chartSlot {min-widt
 </div></main>
 <div id="dailyTabPanel" role="tabpanel" aria-labelledby="tabDaily" hidden><div class="daily-tab-inner"><section class="panel" id="dailySstPanel">
 <div class="toolbar"><h2 style="margin:0">일별 해수면온도 비교</h2><div class="daily-actions"><button class="secondary" id="dailyMake">시계열 4장 생성</button><button class="secondary" id="dailyCsv" disabled>일별 자료 CSV</button></div></div>
-<div class="daily-range" role="group" aria-label="시계열 연도와 날짜 범위"><label for="dailyTargetYear">대상 연도<input id="dailyTargetYear" type="number" min="2000" max="2100" value="2026"></label><label for="dailyDateFrom">시작일<input id="dailyDateFrom" type="date" value="2026-09-01"></label><span class="daily-separator">~</span><label for="dailyDateTo">종료일<input id="dailyDateTo" type="date" value="2026-10-31"></label></div>
+<div class="daily-range" role="group" aria-label="시계열 연도와 날짜 범위"><label for="dailyTargetYear">대상 연도<input id="dailyTargetYear" type="number" min="2000" max="2100" value="2026"></label><label for="dailyDateFrom">시작일<input id="dailyDateFrom" type="date" value="2026-09-17"></label><span class="daily-separator">~</span><label for="dailyDateTo">종료일<input id="dailyDateTo" type="date" value="2026-11-16"></label></div>
 <div class="daily-config">
   <div class="daily-config-header"><strong>평균선 기준연도</strong><span class="caption">기준기간의 각 날짜별 평균을 계산합니다.</span></div>
   <div class="daily-config-row">
@@ -525,6 +525,8 @@ const DAILY_DEFAULT_PALETTE=['#d14e54','#2d69c7','#2f8e6f','#a46bb5','#d39232','
 function dailyColorValid(v){return /^#[0-9a-f]{6}$/i.test(v);}
 // Newest available official marine buoy observation year determines the rolling defaults.
 let dailyLastAutoYear=null;
+let dailyLastAutoDate=null;
+let dailyAutoDateFrom=null,dailyAutoDateTo=null;
 function dailyYearColor(year,latest){
  if(year===latest)return '#ff0000';
  if(year===latest-1)return '#91a5f2'; // rgb(145,165,242) for the year immediately preceding the latest
@@ -542,17 +544,32 @@ function refreshDailyYearPicker(){
  if(!years.length){const item=document.createElement('span');item.className='caption';item.textContent='관측자료를 불러오면 선택 가능한 연도가 표시됩니다.';root.append(item);return;}
  const latest=years[years.length-1],firstYear=latest-9;
  const resetDefaults=dailyLastAutoYear===null||latest!==dailyLastAutoYear;
+ // Use the newest actually stored daily observation, not today's date.
+ const latestObservation=STORE.records.reduce((date,r)=>
+  r.source==='marine'&&Object.prototype.hasOwnProperty.call(MARINE_IDS,String(r.id))&&
+  Number.isFinite(r.sst)&&/^\d{4}-\d{2}-\d{2}$/.test(r.date)&&r.date>date?r.date:date,'');
  if(resetDefaults){
   $('dailyAvgStart').value=String(firstYear);
   $('dailyAvgEnd').value=String(latest);
   $('dailyTargetYear').value=String(latest);
-  for(const id of ['dailyDateFrom','dailyDateTo']){
-   const el=$(id),md=el.value.slice(5);
-   if(!/^\d{2}-\d{2}$/.test(md))continue;
-   const candidate=latest+'-'+md,dt=new Date(candidate+'T12:00:00');
-   el.value=dt.getFullYear()===latest&&dt.getMonth()+1===Number(md.slice(0,2))&&dt.getDate()===Number(md.slice(3,5))?candidate:latest+'-02-28';
-  }
  }
+ const previouslyAuto=dailyAutoDateFrom!==null&&
+  $('dailyDateFrom').value===dailyAutoDateFrom&&$('dailyDateTo').value===dailyAutoDateTo;
+ // Default to the most recent 61 calendar days, without crossing into the previous year.
+ // Keep manually edited dates if new observations arrive in the same year.
+ if(latestObservation&&(resetDefaults||(latestObservation!==dailyLastAutoDate&&previouslyAuto))){
+  const endDate=new Date(latestObservation+'T12:00:00');
+  const startDate=new Date(endDate);
+  startDate.setDate(startDate.getDate()-60);
+  const yearStart=new Date(latest+'-01-01T12:00:00');
+  if(startDate<yearStart)startDate.setTime(yearStart.getTime());
+  const yyyyMMdd=date=>date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0');
+  dailyAutoDateFrom=yyyyMMdd(startDate);
+  dailyAutoDateTo=latestObservation;
+  $('dailyDateFrom').value=dailyAutoDateFrom;
+  $('dailyDateTo').value=dailyAutoDateTo;
+ }
+ dailyLastAutoDate=latestObservation;
  for(const yr of years){
   const wrap=document.createElement('div');wrap.className='daily-year';wrap.dataset.year=String(yr);
   const label=document.createElement('label');label.className='daily-year-main';
