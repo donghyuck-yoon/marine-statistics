@@ -107,6 +107,11 @@ main > aside, main > div, main section, .panel, #tableSlot, #chartSlot {min-widt
 .stat-tab{border:1px solid var(--line);border-bottom:0;background:#eef1ef;color:#40545a;padding:13px 20px;border-radius:5px 5px 0 0;font-size:14px;font-weight:750;margin:0;cursor:pointer}
 .stat-tab.active{background:#fff;color:#096a68;box-shadow:inset 0 3px #096a68}
 .stat-tab:focus-visible{outline:3px solid #82b5aa;outline-offset:2px}
+/* The third site tab links to the standalone monthly-anomaly analyzer. */
+.stat-tabs{overflow-x:auto;scrollbar-width:thin}
+.stat-tabs .stat-tab{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;text-decoration:none;white-space:nowrap}
+.stat-tabs .stat-tab:visited{color:#40545a}
+@media(max-width:620px){.stat-tabs .stat-tab{flex:0 0 auto;padding:12px 9px;font-size:11px}}
 #statisticsTabPanel{margin-top:20px}
 #statisticsTabPanel[hidden],#dailyTabPanel[hidden]{display:none!important}
 #dailyTabPanel{max-width:1280px;margin:20px auto 32px;padding:0 20px}
@@ -120,6 +125,7 @@ main > aside, main > div, main section, .panel, #tableSlot, #chartSlot {min-widt
 <nav class="stat-tabs" aria-label="분석 화면 선택">
 <button type="button" class="stat-tab active" id="tabStatistics" role="tab" aria-selected="true" aria-controls="statisticsTabPanel">월별·계절별 통계</button>
 <button type="button" class="stat-tab" id="tabDaily" role="tab" aria-selected="false" aria-controls="dailyTabPanel">일별 해수면온도 시계열</button>
+<a class="stat-tab" href="./sst-anomaly.html">월별 해수면 온도 편차</a>
 </nav>
 <main id="statisticsTabPanel" role="tabpanel" aria-labelledby="tabStatistics"><aside>
 <h2>01 / 관측자료</h2>
@@ -518,8 +524,15 @@ function switchAnalysisTab(which){
  $('tabStatistics').setAttribute('aria-selected',String(!daily));
  $('tabDaily').setAttribute('aria-selected',String(daily));
 }
-$('tabStatistics').onclick=()=>switchAnalysisTab('statistics');
-$('tabDaily').onclick=()=>switchAnalysisTab('daily');
+$('tabStatistics').onclick=()=>{switchAnalysisTab('statistics');if(location.hash!=='#statistics')history.replaceState(null,'','#statistics');};
+$('tabDaily').onclick=()=>{switchAnalysisTab('daily');if(location.hash!=='#daily')history.replaceState(null,'','#daily');};
+/* Allow direct navigation back to the daily tab from the monthly-anomaly page. */
+function restoreSiteTabFromHash(){
+ if(location.hash==='#daily')switchAnalysisTab('daily');
+ else if(location.hash==='#statistics')switchAnalysisTab('statistics');
+}
+window.addEventListener('hashchange',restoreSiteTabFromHash);
+restoreSiteTabFromHash();
 /* Custom daily SST: chosen years and configurable multi-year mean. */
 const DAILY_DEFAULT_PALETTE=['#d14e54','#2d69c7','#2f8e6f','#a46bb5','#d39232','#208b9b','#884f40','#879448'];
 function dailyColorValid(v){return /^#[0-9a-f]{6}$/i.test(v);}
