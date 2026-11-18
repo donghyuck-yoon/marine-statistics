@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>우리나라 주변 해역 | 해수면 온도 월별 편차 분석</title>
+<style>
+:root{--navy:#113351;--navy2:#234a67;--ink:#162e42;--muted:#6d8292;--border:#dce6ee;--wash:#f4f7fa;--orange:#ea783e;--red:#c62828;--blue:#08759c;--teal:#16827b;--card:#fff;--shadow:0 6px 22px rgba(26,53,77,.048)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--wash);color:var(--ink);font-family: "Pretendard", "Noto Sans KR", "Malgun Gothic", "Apple SD Gothic Neo",system-ui,sans-serif;font-size:14px;line-height:1.55}
+button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #90cbed;outline-offset:2px}
+.shell{max-width:1390px;padding:0 25px;margin:0 auto}
+.hero{background:linear-gradient(115deg,#102d49 0%,#15435e 65%,#1b5366 100%);color:#fff;padding:29px 0 27px;border-bottom:4px solid #d6edf2}
+.hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
+.eyebrow{font-size:11px;font-weight:750;letter-spacing:.18em;color:#a3d6e1;text-transform:uppercase;margin-bottom:7px}
+h1{font-size:26px;font-weight:790;letter-spacing:-.055em;margin:0 0 6px}h1 span{font-weight:400;opacity:.86}
+.hero p{margin:0;color:#c4d7e3;font-size:13px}.badge-top{align-self:center;white-space:nowrap;border:1px solid rgba(200,232,245,.36);background:rgba(255,255,255,.09);border-radius:99px;padding:8px 14px;font-size:12px;color:#e6f3f8}
+.hero-stats{display:flex;align-items:center;flex-wrap:wrap;gap:22px;margin-top:19px}.hstat{display:flex;flex-direction:column;gap:2px;min-width:120px}.hstat .small{font-size:11px;color:#a9cbd9}.hstat strong{font-size:15px;letter-spacing:-.03em;font-weight:700}.hero-stats .sep{height:25px;border-right:1px solid rgba(255,255,255,.2)}
+.main{padding-top:23px;padding-bottom:58px}
+.editor{background:#fff;border:1px solid var(--border);border-radius:13px;box-shadow:var(--shadow);margin-bottom:19px;padding:20px 23px}
+.section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:15px}.section-head h2{font-size:17px;letter-spacing:-.03em;margin:0 0 2px}.section-head p{color:var(--muted);margin:0;font-size:12px}
+.smallpill{background:#e8f3f6;color:#236079;font-size:11px;border-radius:99px;padding:5px 11px;white-space:nowrap;font-weight:700}
+.fields{display:grid;grid-template-columns:190px repeat(3,minmax(120px,1fr)) auto;gap:11px;align-items:end}.field label{display:block;font-weight:700;color:#38556b;font-size:12px;margin-bottom:5px}.field input,.field select{width:100%;height:42px;border-radius:7px;border:1px solid #d0dfe9;padding:0 12px;color:#142f44;background:#fff}.field input:focus{border-color:#4b9bba}.field input::placeholder{color:#a5b4bf}.btn{border:1px solid #cbd9e3;border-radius:7px;padding:0 16px;height:42px;color:var(--navy);background:#fff;font-weight:740;white-space:nowrap;transition:transform .15s,background .15s}.btn:hover{background:#edf5f8}.btn:active{transform:translateY(1px)}.btn-primary{background:var(--navy);border-color:var(--navy);color:#fff;box-shadow:0 2px 8px rgba(17,51,81,.12)}.btn-primary:hover{background:#1d5678}.field-note{font-size:11px;color:#728594;margin:10px 0 0}
+.range-box{margin-bottom:18px;border-left:4px solid #2d869c}
+.range-fields{display:grid;grid-template-columns:minmax(180px,215px) minmax(180px,215px) auto auto;gap:11px;align-items:end}
+.range-fields .field input{width:100%;height:42px;border-radius:7px;border:1px solid #d0dfe9;padding:0 12px;color:#142f44;background:#fff}
+.range-option{display:flex;align-items:center;gap:8px;font-size:12px;color:#496575;font-weight:600;cursor:pointer;margin-top:12px}
+.range-option input{width:16px;height:16px;accent-color:#165b7c;cursor:pointer}
+.range-hint{font-size:11px;color:#728594;margin:9px 0 0}
+.range-applied{color:#2c7082;font-weight:700}
+.range-warning{color:#b15c2c;font-weight:700}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:20px 1px 12px}.toolbar .left{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.toolbar h2{font-size:18px;letter-spacing:-.035em;margin:0}.toolbar .muted{color:#7e90a0;font-size:12px}.toolbar .right{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.toolbar select{border:1px solid #d2e0e9;color:#25465e;background:#fff;font-size:12px;padding:9px 11px;border-radius:7px;max-width:290px}.toolbar label{font-size:12px;color:#536c7e;font-weight:700}
+#charts{display:flex;flex-direction:column;gap:16px}.region-card{background:#fff;border:1px solid var(--border);border-radius:13px;box-shadow:var(--shadow);overflow:hidden}.region-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:18px 22px 0}.region-name{display:flex;gap:10px;align-items:center}.region-bullet{width:9px;height:9px;border-radius:50%;background:var(--sea)}.region-name h3{font-size:18px;margin:0;letter-spacing:-.04em}.region-name .sub{font-size:12px;color:#8295a3;margin-left:5px;font-weight:500}
+.stat-pairs{display:flex;gap:18px;align-items:center}.stat{display:flex;flex-direction:column;gap:1px;text-align:right}.stat .lbl{font-size:11px;color:#778a99}.stat strong{font-size:18px;font-weight:790;letter-spacing:-.04em}.stat .small{font-size:10px;color:#8193a1}.positive{color:#b94827}.negative{color:#0b76a8}.zero{color:#36556a}
+.plot-wrap{position:relative;padding:0 17px 8px;overflow-x:auto;overflow-y:hidden;scrollbar-color:#cbdce5 transparent}.plot-stack{position:relative;margin:0 auto;min-width:640px;max-width:none}.plot{display:block;width:100%;height:auto;min-height:210px;touch-action:pan-y;max-width:none;margin:0 auto}.hover-tip{position:absolute;pointer-events:none;z-index:4;min-width:138px;background:#12334b;color:#fff;padding:9px 12px;border-radius:8px;box-shadow:0 8px 24px rgba(25,54,77,.23);font-size:12px;line-height:1.7;transform:translate(-50%,-105%);white-space:nowrap}.hover-tip strong{font-size:13px}.hover-tip[hidden]{display:none}
+.region-foot{border-top:1px solid #edf1f4;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;padding:11px 22px;background:#fcfdfe;font-size:12px}.region-foot .breakdown{display:flex;gap:18px;flex-wrap:wrap;color:#60798a}.region-foot .breakdown strong{color:#193b53}.plot-actions{display:flex;align-items:center;gap:9px}.textbtn{border:0;color:#39718d;background:none;padding:3px 1px;font-size:11px;font-weight:750}.textbtn:hover{text-decoration:underline}
+.controls-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.help{margin:20px 2px 0;background:#eef4f8;border:1px solid #dce7ee;border-radius:10px;padding:14px 18px;color:#4f6d7e}.help strong{color:#244b64}.help p{font-size:12px;margin:5px 0 0}.help .notice{color:#926132}
+.extra{background:#fff;border:1px solid var(--border);border-radius:12px;margin-top:18px;overflow:hidden}.extra summary{cursor:pointer;padding:15px 21px;font-size:13px;font-weight:750;color:var(--navy)}.extra-inner{border-top:1px solid #ebf0f3;padding:16px 20px}.extra-head{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:14px}.extra-head .controls-row button{height:34px;padding:0 11px;font-size:11px}.table-wrap{max-height:340px;overflow:auto;border:1px solid #e0e9ee;border-radius:8px}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}th,td{padding:8px 12px;border-bottom:1px solid #e6edf2;text-align:right}th:first-child,td:first-child{text-align:left}th{font-size:11px;color:#60798b;background:#f1f6f9;position:sticky;top:0}td{font-size:12px;color:#27465b}tr:last-child td{border-bottom:none}tbody tr{cursor:pointer}tbody tr:hover{background:#edf5f8}.footnote{font-size:11px;color:#8195a3;margin:14px 1px 0}
+.toast{position:fixed;z-index:20;bottom:22px;right:22px;background:#153952;color:#fff;padding:12px 17px;border-radius:9px;box-shadow:0 6px 28px #18385044;max-width:360px;font-size:12px;opacity:0;transform:translateY(12px);pointer-events:none;transition:opacity .2s,transform .2s}.toast.show{opacity:1;transform:translateY(0)}
+.viz-controls{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:12px 18px;margin:0 0 15px;border:1px solid var(--border);border-radius:10px;background:#fff;box-shadow:var(--shadow)}
+.viz-lead{display:flex;flex-direction:column;min-width:140px}.viz-lead strong{font-size:12px;color:#284e64}.viz-lead small{font-size:10px;color:#8598a7}
+.viz-control{display:flex;align-items:center;gap:10px;flex:1;min-width:240px}.viz-control label{font-size:12px;font-weight:700;color:#516d7d;white-space:nowrap}.viz-control input[type=range]{flex:1;accent-color:#206d91;cursor:pointer;height:17px;min-width:90px}.viz-control output{font-size:12px;color:#17465f;font-weight:800;width:48px;text-align:right;font-variant-numeric:tabular-nums}
+.viz-ratio{font-size:11px;color:#678395;min-width:95px;text-align:center}.viz-controls .btn{height:33px;padding:0 12px;font-size:11px}
+.legend-strip{margin:2px 0 0;padding:7px 13px 6px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px 10px;border:1px solid #e2ebf0;border-radius:8px;background:#f8fbfd;width:100%}
+.legend-metric{min-width:0;padding-left:0;border-left:none}.legend-metric.ref{}.legend-metric.decade{}.legend-metric.full{}.legend-metric.recent{}
+.legend-label{display:block;font-size:11px;line-height:1.24;font-weight:720;color:#111;white-space:nowrap}.legend-value{display:block;font-size:17px;line-height:1.24;font-weight:800;color:#111;letter-spacing:-.035em;font-variant-numeric:tabular-nums;white-space:nowrap}.legend-metric.full .legend-value{color:#c86a32}.legend-metric.recent .legend-value{color:#b12c2e}
+.plot{min-height:0}
+/* 시계열 카드 안 일반 안내문/축 제목/축 눈금은 완전한 검정색으로 표시 */
+.region-card .region-name h3,.region-card .region-name .sub,
+.region-card .stat .lbl,.region-card .stat .small,
+.region-card .legend-label,.region-card .region-foot .breakdown,
+.region-card .region-foot .breakdown strong,.region-card .textbtn{color:#111}
+@media(max-width:1000px){.legend-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.viz-lead{min-width:100px}.plot-stack{min-width:560px}}
+@media(max-width:1000px){.range-fields{grid-template-columns:1fr 1fr}.range-fields .btn{width:100%}.fields{grid-template-columns:repeat(4,minmax(0,1fr))}.fields .save-field{grid-column:1/-1}.fields .save-field .btn{width:100%}.region-top{align-items:flex-start}.stat-pairs{margin-left:auto}.shell{padding-left:16px;padding-right:16px}}@media(max-width:680px){.legend-strip{margin:2px 0 0;padding:7px 10px 6px;gap:4px 8px}.legend-label{font-size:10px}.legend-value{font-size:15px}.viz-controls{gap:9px;padding:12px}.viz-lead{width:100%}.plot-stack{min-width:520px}.viz-control{min-width:100%}.viz-ratio{text-align:left;flex:1}.plot-wrap{padding-left:9px;padding-right:9px}
+@media(max-width:680px){.range-fields{grid-template-columns:1fr 1fr}.range-fields .field{min-width:0}.range-fields .btn{font-size:12px;padding:0 9px}.range-option{align-items:flex-start}h1{font-size:21px}.hero-top{display:block}.badge-top{display:inline-block;margin-top:14px}.hero-stats{gap:14px}.hero-stats .sep{display:none}.editor{padding:18px 16px}.fields{grid-template-columns:1fr 1fr}.fields .field:first-child{grid-column:1/-1}.region-top{padding:15px 15px 0}.stat-pairs{width:100%;justify-content:flex-start}.stat{text-align:left}.stat strong{font-size:16px}.plot-wrap{padding:0 4px}.plot{min-height:165px}.region-foot{padding:10px 14px}.toolbar{align-items:flex-start}.toolbar .right{width:100%}.toolbar select{flex:1;max-width:none}.section-head .smallpill{display:none}}
+@media print{.viz-controls{display:none!important}.range-box{display:none!important}body{background:#fff}.hero{-webkit-print-color-adjust:exact;print-color-adjust:exact}.editor,.toolbar .right,.region-foot .plot-actions,.extra,.toast{display:none!important}.region-card{break-inside:avoid;box-shadow:none;margin:6px 0;border-color:#c9d7e1}.shell{max-width:none}}
+
+/* Shared top navigation across the observatory and the monthly-anomaly page. */
+.site-tabs{max-width:1390px;margin:17px auto 0;padding:0 25px;display:flex;gap:8px;border-bottom:1px solid #d6d9d7;overflow-x:auto;scrollbar-width:thin}
+.site-tab{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;text-decoration:none;white-space:nowrap;border:1px solid #d6d9d7;border-bottom:0;background:#eef1ef;color:#40545a;padding:13px 20px;border-radius:5px 5px 0 0;font-size:14px;font-weight:750}
+.site-tab:visited{color:#40545a}.site-tab:hover{background:#f7faf8}.site-tab.active,.site-tab.active:visited{background:#fff;color:#096a68;box-shadow:inset 0 3px #096a68}
+.site-tab:focus-visible{outline:3px solid #82b5aa;outline-offset:2px}
+@media(max-width:620px){.site-tabs{gap:4px;padding:0 15px}.site-tab{font-size:11px;padding:12px 9px}}
+</style>
+</head>
+<body>
+<header class="hero"><div class="shell">
+ <div class="hero-top"><div><div class="eyebrow">KOREAN SEAS · MONTHLY ANOMALY MONITOR</div><h1>우리나라 주변 해역 <span>해수면 온도 편차 분석</span></h1><p>서해 · 남해 · 동해 | 월별 시계열 및 경향성 · 자료를 추가하면 자동 재산출</p></div><div class="badge-top">월별 편차 · 독립형 분석 화면</div></div>
+ <div class="hero-stats"><div class="hstat"><span class="small">원본 자료 수록 기간</span><strong id="dataRange">-</strong></div><div class="sep"></div><div class="hstat"><span class="small">선택 분석기간</span><strong id="chosenRange">-</strong></div><div class="sep"></div><div class="hstat"><span class="small">최근 10년 계산구간</span><strong id="recentRange">-</strong></div><div class="sep"></div><div class="hstat"><span class="small">해역별 월자료</span><strong id="countDisplay">-</strong></div></div>
+</div></header>
+<nav class="site-tabs" aria-label="분석 화면 선택">
+<a class="site-tab" href="./index.html#statistics">월별·계절별 통계</a>
+<a class="site-tab" href="./index.html#daily">일별 해수면온도 시계열</a>
+<a class="site-tab active" href="./sst-anomaly.html" aria-current="page">월별 해수면 온도 편차</a>
+</nav>
+<main class="shell main">
+<section class="editor" aria-label="월별 편차 입력"><div class="section-head"><div><h2>월별 해수면 온도 편차 입력</h2><p>해당 월의 평년 대비 편차를 입력하세요. 기존 월을 선택하면 수정할 수도 있습니다.</p></div><span class="smallpill">단위 ℃</span></div>
+<form id="entryForm"><div class="fields"><div class="field"><label for="monthInput">대상 월</label><input id="monthInput" type="month" min="1991-01" max="2100-12" required /></div>
+<div class="field"><label for="westValue">서해 편차 (℃)</label><input id="westValue" type="number" min="-20" max="20" step="any" placeholder="예: 0.8" inputmode="decimal" /></div>
+<div class="field"><label for="southValue">남해 편차 (℃)</label><input id="southValue" type="number" min="-20" max="20" step="any" placeholder="예: 1.2" inputmode="decimal" /></div>
+<div class="field"><label for="eastValue">동해 편차 (℃)</label><input id="eastValue" type="number" min="-20" max="20" step="any" placeholder="예: 1.5" inputmode="decimal" /></div>
+<div class="save-field"><button type="submit" class="btn btn-primary" id="redrawBtn">새로 그림 그리기 ↗</button></div></div></form>
+<p class="field-note">기존 월의 값이 표시됩니다. 빈 칸은 수정하지 않으며, 입력한 해역 값만 추가·덮어씁니다. 값을 바꾼 후 버튼을 눌러야 그래프에 반영됩니다.</p>
+</section>
+<section class="editor range-box" aria-label="시계열 및 분석기간 설정">
+ <div class="section-head"><div><h2>시계열 · 분석기간 설정</h2><p>연도와 월을 직접 지정하면 세 해역의 그래프 · 경향성 · 평균 편차를 같은 기간으로 다시 계산합니다.</p></div><span class="smallpill">3개 해역 동시 적용</span></div>
+ <form id="rangeForm" class="range-fields">
+  <div class="field"><label for="rangeStart">시작 연월</label><input id="rangeStart" type="month" min="1991-01" max="2100-12" required /></div>
+  <div class="field"><label for="rangeEnd">종료 연월</label><input id="rangeEnd" type="month" min="1991-01" max="2100-12" required /></div>
+  <button type="submit" class="btn btn-primary">기간 적용 · 재분석</button>
+  <button type="button" id="fullRangeBtn" class="btn">전체 자료 보기</button>
+ </form>
+ <label class="range-option" for="followLatest"><input type="checkbox" id="followLatest" checked /><span>새 월자료 입력 시 <b>종료 월을 최신 자료에 자동으로 맞추기</b> (종료 월을 직접 변경하면 자동 해제)</span></label>
+ <p class="range-hint" id="rangeStatus" aria-live="polite">전체 자료 기준으로 표시하고 있습니다.</p>
+</section>
+<div class="toolbar"><div class="left"><h2>해역별 월편차 시계열</h2><span class="muted" id="updateLabel">자료 확인 중</span></div><div class="right"><label for="recentMode">최근 10년 기준</label><select id="recentMode"><option value="same">최근 10개 연도 동일 월부터 (요청 예시)</option><option value="120">정확히 최근 120개월</option></select></div></div>
+<div class="viz-controls" aria-label="그래프 가로 세로 비율 조절">
+ <div class="viz-lead"><strong>그래프 크기 · 비율</strong><small>세 해역에 실시간 적용</small></div>
+ <div class="viz-control"><label for="chartWidthPct">가로 폭</label><input id="chartWidthPct" type="range" min="70" max="170" step="5" value="100" /><output id="chartWidthOut" for="chartWidthPct">100%</output></div>
+ <div class="viz-control"><label for="chartHeightPct">세로 높이</label><input id="chartHeightPct" type="range" min="70" max="230" step="5" value="100" /><output id="chartHeightOut" for="chartHeightPct">100%</output></div>
+ <span class="viz-ratio" id="aspectReadout" aria-live="polite">가로:세로 3.90:1</span>
+ <button type="button" class="btn" id="resetChartSize">기본 비율</button>
+</div>
+<section id="charts" aria-label="서해 남해 동해 시계열"></section>
+<div class="help"><strong>통계 산출 기준</strong><p><b>선택기간 경향성</b>은 시작~종료 월 사이의 편차만 선형회귀하여 비교를 위해 35년(420개월)으로 환산한 값입니다. 선택기간의 실제 누적 변화량이 아닙니다. <b>최근 10년 경향성</b>은 선택한 종료 월을 기준으로 최근기간의 회귀 기울기를 10년(120개월)으로 환산합니다. 단, 선택기간이 10년 미만이면 선택기간 내 자료만 사용하며 화면에 안내합니다. 기울기는 시간축을 실제 월 간격으로 계산하므로 누락된 월을 임의로 이어 붙이지 않습니다.</p><p><b>평년 대비 편차</b>는 선택기간의 마지막 유효 월에 해당하는 엑셀 편차입니다. <b>최근 10년 동월 평균 대비</b>는 선택기간 마지막 유효 월의 편차에서 해당 월과 같은 달의 최근기간 평균 편차를 뺀 값입니다. 범례의 최근 10년 평균 편차는 선택한 종료 월을 기준으로 매번 재계산합니다. 그래프 아래에는 선택기간의 월별 편차 평균을 표시합니다. 평년(1991~2020년) 평균 편차는 기간 선택과 무관하게 고정된 기준기간에서 산출합니다.</p><p class="notice" id="rangeCaution">참고: 요청 예시 기준은 정확히 120개월이 아닙니다.</p></div>
+<details class="extra"><summary>자료 관리 · 최근 12개월 값 확인 · 백업/복원</summary><div class="extra-inner"><div class="extra-head"><div style="font-size:12px;color:#668093">표의 월을 클릭하면 상단 입력란으로 불러옵니다. 변경 이력은 현재 브라우저에서 유지되며, 파일로 별도 보관할 수 있습니다.</div><div class="controls-row"><button type="button" class="btn" id="csvBtn">CSV 내려받기</button><button type="button" class="btn" id="jsonBtn">JSON 백업</button><button type="button" class="btn" id="jsonImportBtn">JSON 복원</button><button type="button" class="btn" id="htmlBtn">현재 데이터 포함 HTML 저장</button><button type="button" class="btn" id="resetBtn">원본 복원</button></div></div>
+<input id="jsonFile" type="file" accept=".json,application/json" hidden />
+<div class="table-wrap"><table><thead><tr><th>연월</th><th>서해 (℃)</th><th>남해 (℃)</th><th>동해 (℃)</th></tr></thead><tbody id="dataTable"></tbody></table></div></div></details>
+<p class="footnote">자료 출처: 사용자가 제공한 서해.xlsx · 남해.xlsx · 동해.xlsx (1991년 1월~2026년 11월). 범례의 ‘평년(1991년~2020년)’ 값은 해당 기간에 포함된 월별 편차를 평균한 값입니다(원자료 소수점 반올림으로 0℃와 약간 다를 수 있음). 해수면 온도의 절대값이 아닙니다. 이 페이지는 브라우저에서만 계산하며 입력값을 서버에 전송하지 않습니다. GitHub Pages에서 입력한 월별 수정값은 현재 브라우저에만 저장됩니다. 모든 방문자에게 새 자료를 공개하려면 자료 포함 HTML을 저장한 뒤 GitHub 저장소의 sst-anomaly.html을 갱신해야 합니다.</p>
+</main>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script id="original-data" type="application/json">{"version":1,"savedAt":0,"regions":{"west":{"1991-01":0.4,"1991-02":0.1,"1991-03":0.4,"1991-04":0.5,"1991-05":-0.3,"1991-06":-0.2,"1991-07":-0.4,"1991-08":-1.1,"1991-09":-0.4,"1991-10":-0.5,"1991-11":-0.7,"1991-12":0.1,"1992-01":0.5,"1992-02":0.6,"1992-03":0.6,"1992-04":0.9,"1992-05":0.1,"1992-06":-0.4,"1992-07":-0.2,"1992-08":-0.3,"1992-09":-0.7,"1992-10":-0.9,"1992-11":-0.6,"1992-12":-0.2,"1993-01":-0.1,"1993-02":0.2,"1993-03":0.0,"1993-04":-0.5,"1993-05":-0.5,"1993-06":-1.0,"1993-07":-0.9,"1993-08":-1.6,"1993-09":-0.1,"1993-10":-0.1,"1993-11":-0.1,"1993-12":-0.4,"1994-01":-0.2,"1994-02":-0.1,"1994-03":-0.3,"1994-04":-0.1,"1994-05":-0.4,"1994-06":-0.2,"1994-07":1.5,"1994-08":-0.1,"1994-09":0.5,"1994-10":0.0,"1994-11":0.4,"1994-12":0.8,"1995-01":0.7,"1995-02":0.5,"1995-03":0.5,"1995-04":0.1,"1995-05":-0.6,"1995-06":-0.1,"1995-07":0.4,"1995-08":0.3,"1995-09":-0.7,"1995-10":0.4,"1995-11":-0.4,"1995-12":0.1,"1996-01":0.0,"1996-02":0.4,"1996-03":0.3,"1996-04":-0.6,"1996-05":-0.4,"1996-06":0.1,"1996-07":-1.2,"1996-08":0.8,"1996-09":0.7,"1996-10":0.1,"1996-11":0.1,"1996-12":-0.1,"1997-01":0.0,"1997-02":0.3,"1997-03":0.2,"1997-04":-0.1,"1997-05":0.6,"1997-06":0.4,"1997-07":1.4,"1997-08":0.7,"1997-09":0.6,"1997-10":-0.1,"1997-11":0.3,"1997-12":0.4,"1998-01":0.4,"1998-02":0.8,"1998-03":0.7,"1998-04":1.1,"1998-05":0.8,"1998-06":-0.4,"1998-07":0.3,"1998-08":-0.1,"1998-09":0.5,"1998-10":0.8,"1998-11":0.8,"1998-12":0.4,"1999-01":0.6,"1999-02":0.4,"1999-03":0.2,"1999-04":0.2,"1999-05":0.6,"1999-06":0.2,"1999-07":-0.1,"1999-08":-0.6,"1999-09":0.3,"1999-10":0.4,"1999-11":-0.1,"1999-12":-1.1,"2000-01":-0.1,"2000-02":0.5,"2000-03":-0.2,"2000-04":-0.4,"2000-05":-0.6,"2000-06":-0.1,"2000-07":0.2,"2000-08":0.8,"2000-09":-0.4,"2000-10":-0.2,"2000-11":0.1,"2000-12":0.5,"2001-01":-0.1,"2001-02":-0.4,"2001-03":-0.5,"2001-04":-0.1,"2001-05":0.6,"2001-06":0.4,"2001-07":1.3,"2001-08":0.5,"2001-09":0.8,"2001-10":-0.5,"2001-11":0.0,"2001-12":-0.4,"2002-01":0.0,"2002-02":0.7,"2002-03":0.7,"2002-04":0.7,"2002-05":0.1,"2002-06":0.7,"2002-07":-0.3,"2002-08":-0.8,"2002-09":-1.1,"2002-10":-0.3,"2002-11":-0.7,"2002-12":-0.5,"2003-01":-0.5,"2003-02":-0.3,"2003-03":0.1,"2003-04":-0.4,"2003-05":0.6,"2003-06":-0.6,"2003-07":-1.7,"2003-08":-1.4,"2003-09":-0.4,"2003-10":-0.3,"2003-11":0.0,"2003-12":-0.5,"2004-01":-0.3,"2004-02":0.0,"2004-03":0.0,"2004-04":-0.5,"2004-05":0.1,"2004-06":0.0,"2004-07":-0.2,"2004-08":1.1,"2004-09":0.1,"2004-10":-0.1,"2004-11":0.8,"2004-12":1.4,"2005-01":0.5,"2005-02":-0.3,"2005-03":-0.5,"2005-04":0.1,"2005-05":0.0,"2005-06":0.6,"2005-07":0.8,"2005-08":-0.8,"2005-09":-0.7,"2005-10":-0.2,"2005-11":0.2,"2005-12":-0.5,"2006-01":-0.7,"2006-02":-0.4,"2006-03":-0.5,"2006-04":-1.1,"2006-05":-0.2,"2006-06":-0.6,"2006-07":-0.1,"2006-08":1.2,"2006-09":-0.2,"2006-10":1.5,"2006-11":1.0,"2006-12":0.5,"2007-01":0.0,"2007-02":0.8,"2007-03":0.9,"2007-04":0.1,"2007-05":0.3,"2007-06":-0.1,"2007-07":-0.2,"2007-08":0.4,"2007-09":0.1,"2007-10":0.1,"2007-11":-0.2,"2007-12":0.3,"2008-01":-0.4,"2008-02":-0.4,"2008-03":-0.5,"2008-04":-0.2,"2008-05":-0.2,"2008-06":-0.8,"2008-07":0.1,"2008-08":0.1,"2008-09":0.3,"2008-10":0.2,"2008-11":0.1,"2008-12":-0.5,"2009-01":-0.5,"2009-02":0.3,"2009-03":0.2,"2009-04":1.0,"2009-05":0.6,"2009-06":0.0,"2009-07":-0.7,"2009-08":-1.1,"2009-09":-0.1,"2009-10":0.5,"2009-11":0.3,"2009-12":-0.4,"2010-01":-0.7,"2010-02":-1.0,"2010-03":-0.5,"2010-04":-0.9,"2010-05":-1.0,"2010-06":0.0,"2010-07":0.3,"2010-08":0.5,"2010-09":0.5,"2010-10":-0.3,"2010-11":-0.8,"2010-12":-0.7,"2011-01":-1.2,"2011-02":-0.9,"2011-03":-1.0,"2011-04":-0.9,"2011-05":-1.0,"2011-06":-1.3,"2011-07":-0.8,"2011-08":-2.2,"2011-09":-1.7,"2011-10":-1.0,"2011-11":0.2,"2011-12":0.4,"2012-01":-0.2,"2012-02":-0.7,"2012-03":-0.9,"2012-04":-0.8,"2012-05":0.1,"2012-06":1.3,"2012-07":0.9,"2012-08":-0.1,"2012-09":-1.0,"2012-10":-0.1,"2012-11":-1.0,"2012-12":-1.2,"2013-01":-1.0,"2013-02":-0.7,"2013-03":-0.6,"2013-04":-1.4,"2013-05":-0.6,"2013-06":-0.1,"2013-07":0.4,"2013-08":1.5,"2013-09":0.2,"2013-10":0.1,"2013-11":-0.3,"2013-12":0.0,"2014-01":0.3,"2014-02":0.6,"2014-03":0.5,"2014-04":1.4,"2014-05":0.4,"2014-06":0.5,"2014-07":-0.8,"2014-08":-1.4,"2014-09":0.2,"2014-10":0.1,"2014-11":0.4,"2014-12":0.1,"2015-01":0.2,"2015-02":0.1,"2015-03":-0.1,"2015-04":0.0,"2015-05":0.5,"2015-06":0.2,"2015-07":-0.3,"2015-08":0.1,"2015-09":0.2,"2015-10":0.1,"2015-11":0.9,"2015-12":0.0,"2016-01":0.2,"2016-02":-0.5,"2016-03":-0.2,"2016-04":0.0,"2016-05":-0.1,"2016-06":0.5,"2016-07":0.3,"2016-08":1.4,"2016-09":0.1,"2016-10":0.3,"2016-11":-0.6,"2016-12":-0.3,"2017-01":0.0,"2017-02":-0.2,"2017-03":-0.2,"2017-04":0.3,"2017-05":1.1,"2017-06":0.6,"2017-07":1.7,"2017-08":1.0,"2017-09":-0.3,"2017-10":-0.2,"2017-11":-0.7,"2017-12":-0.7,"2018-01":-0.7,"2018-02":-1.6,"2018-03":-1.0,"2018-04":-0.4,"2018-05":0.0,"2018-06":0.3,"2018-07":1.0,"2018-08":1.5,"2018-09":1.0,"2018-10":0.0,"2018-11":0.2,"2018-12":0.5,"2019-01":-0.1,"2019-02":-0.2,"2019-03":0.1,"2019-04":0.1,"2019-05":0.4,"2019-06":-0.5,"2019-07":-0.3,"2019-08":0.4,"2019-09":-0.2,"2019-10":0.7,"2019-11":0.5,"2019-12":0.4,"2020-01":0.8,"2020-02":0.7,"2020-03":0.7,"2020-04":0.2,"2020-05":-0.2,"2020-06":0.4,"2020-07":-1.5,"2020-08":-1.0,"2020-09":0.2,"2020-10":0.2,"2020-11":0.7,"2020-12":0.6,"2021-01":0.1,"2021-02":0.6,"2021-03":0.9,"2021-04":0.7,"2021-05":0.3,"2021-06":0.6,"2021-07":1.4,"2021-08":0.8,"2021-09":0.9,"2021-10":1.5,"2021-11":1.2,"2021-12":1.4,"2022-01":1.0,"2022-02":0.5,"2022-03":0.2,"2022-04":0.3,"2022-05":0.7,"2022-06":0.6,"2022-07":1.7,"2022-08":0.8,"2022-09":-0.9,"2022-10":-0.8,"2022-11":0.5,"2022-12":0.8,"2023-01":0.7,"2023-02":0.5,"2023-03":0.4,"2023-04":0.6,"2023-05":0.5,"2023-06":0.7,"2023-07":1.0,"2023-08":2.1,"2023-09":1.5,"2023-10":0.6,"2023-11":1.1,"2023-12":1.0,"2024-01":1.3,"2024-02":1.4,"2024-03":1.0,"2024-04":1.4,"2024-05":1.4,"2024-06":2.0,"2024-07":0.6,"2024-08":2.8,"2024-09":3.8,"2024-10":2.2,"2024-11":1.7,"2024-12":1.1,"2025-01":0.9,"2025-02":0.5,"2025-03":0.0,"2025-04":-0.4,"2025-05":-0.6,"2025-06":0.0,"2025-07":2.4,"2025-08":2.4,"2025-09":2.8,"2025-10":1.7,"2025-11":0.6,"2025-12":1.0,"2026-01":0.5,"2026-02":0.5,"2026-03":0.7,"2026-04":0.4,"2026-05":0.9,"2026-06":1.2,"2026-07":1.1,"2026-08":2.3,"2026-09":2.0,"2026-10":1.5,"2026-11":1.2},"south":{"1991-01":-0.1,"1991-02":-0.4,"1991-03":0.0,"1991-04":0.2,"1991-05":-0.8,"1991-06":-0.7,"1991-07":-0.5,"1991-08":-1.3,"1991-09":-0.4,"1991-10":-1.0,"1991-11":-0.9,"1991-12":-0.2,"1992-01":-0.1,"1992-02":0.2,"1992-03":0.1,"1992-04":0.3,"1992-05":-0.3,"1992-06":-0.3,"1992-07":-0.7,"1992-08":-0.4,"1992-09":-0.1,"1992-10":-0.6,"1992-11":-0.4,"1992-12":-0.2,"1993-01":-0.1,"1993-02":-0.2,"1993-03":0.0,"1993-04":-0.2,"1993-05":-0.7,"1993-06":-0.9,"1993-07":-1.6,"1993-08":-1.7,"1993-09":-0.9,"1993-10":-0.9,"1993-11":-0.4,"1993-12":-0.2,"1994-01":-0.2,"1994-02":-0.3,"1994-03":-0.4,"1994-04":-0.2,"1994-05":-0.2,"1994-06":0.0,"1994-07":2.0,"1994-08":0.0,"1994-09":0.2,"1994-10":-0.3,"1994-11":0.0,"1994-12":0.3,"1995-01":0.7,"1995-02":0.0,"1995-03":0.0,"1995-04":-0.3,"1995-05":-0.7,"1995-06":-0.8,"1995-07":-0.5,"1995-08":0.3,"1995-09":-0.1,"1995-10":-0.1,"1995-11":-0.3,"1995-12":-0.6,"1996-01":-0.5,"1996-02":-0.6,"1996-03":-0.4,"1996-04":-0.7,"1996-05":-0.2,"1996-06":0.2,"1996-07":-0.5,"1996-08":0.5,"1996-09":0.4,"1996-10":0.0,"1996-11":0.8,"1996-12":0.3,"1997-01":0.3,"1997-02":0.4,"1997-03":0.5,"1997-04":0.2,"1997-05":0.4,"1997-06":0.5,"1997-07":0.2,"1997-08":-0.6,"1997-09":-0.1,"1997-10":-0.5,"1997-11":0.2,"1997-12":0.4,"1998-01":0.3,"1998-02":0.5,"1998-03":0.6,"1998-04":1.1,"1998-05":1.0,"1998-06":0.3,"1998-07":1.0,"1998-08":1.0,"1998-09":0.3,"1998-10":0.6,"1998-11":0.4,"1998-12":0.6,"1999-01":0.4,"1999-02":0.6,"1999-03":0.3,"1999-04":0.3,"1999-05":0.5,"1999-06":0.2,"1999-07":-1.4,"1999-08":-1.8,"1999-09":0.1,"1999-10":0.4,"1999-11":-0.1,"1999-12":-0.5,"2000-01":0.3,"2000-02":0.2,"2000-03":-0.5,"2000-04":-0.6,"2000-05":0.0,"2000-06":-0.1,"2000-07":0.8,"2000-08":0.5,"2000-09":-0.1,"2000-10":0.4,"2000-11":0.3,"2000-12":0.4,"2001-01":0.5,"2001-02":0.4,"2001-03":0.3,"2001-04":0.9,"2001-05":0.7,"2001-06":0.1,"2001-07":1.5,"2001-08":1.3,"2001-09":-0.1,"2001-10":0.2,"2001-11":0.0,"2001-12":0.0,"2002-01":-0.5,"2002-02":0.3,"2002-03":0.1,"2002-04":0.3,"2002-05":0.3,"2002-06":1.2,"2002-07":-0.7,"2002-08":-0.6,"2002-09":-0.6,"2002-10":0.1,"2002-11":-0.4,"2002-12":-0.3,"2003-01":-0.3,"2003-02":-0.1,"2003-03":-0.1,"2003-04":-0.5,"2003-05":0.2,"2003-06":-0.3,"2003-07":-0.9,"2003-08":-0.3,"2003-09":0.4,"2003-10":-0.1,"2003-11":0.3,"2003-12":0.3,"2004-01":0.1,"2004-02":0.0,"2004-03":0.0,"2004-04":0.2,"2004-05":0.2,"2004-06":0.9,"2004-07":0.8,"2004-08":0.8,"2004-09":-0.1,"2004-10":-0.4,"2004-11":0.0,"2004-12":1.0,"2005-01":0.5,"2005-02":0.0,"2005-03":-0.3,"2005-04":0.5,"2005-05":0.4,"2005-06":1.2,"2005-07":1.1,"2005-08":0.3,"2005-09":0.3,"2005-10":0.8,"2005-11":0.6,"2005-12":-0.4,"2006-01":-0.6,"2006-02":-0.2,"2006-03":-0.2,"2006-04":-0.6,"2006-05":-0.9,"2006-06":-0.7,"2006-07":-0.5,"2006-08":1.2,"2006-09":0.0,"2006-10":0.6,"2006-11":0.7,"2006-12":0.6,"2007-01":0.1,"2007-02":0.7,"2007-03":0.6,"2007-04":0.1,"2007-05":0.1,"2007-06":0.1,"2007-07":-0.3,"2007-08":0.6,"2007-09":0.6,"2007-10":0.7,"2007-11":-0.2,"2007-12":0.0,"2008-01":0.0,"2008-02":-0.1,"2008-03":-0.3,"2008-04":-0.3,"2008-05":0.1,"2008-06":-0.7,"2008-07":0.8,"2008-08":0.3,"2008-09":0.2,"2008-10":0.6,"2008-11":0.2,"2008-12":0.1,"2009-01":-0.3,"2009-02":0.4,"2009-03":0.6,"2009-04":0.7,"2009-05":0.5,"2009-06":0.0,"2009-07":-0.2,"2009-08":-1.0,"2009-09":0.0,"2009-10":0.1,"2009-11":-0.1,"2009-12":0.0,"2010-01":-0.6,"2010-02":-0.3,"2010-03":-0.4,"2010-04":-0.5,"2010-05":-0.1,"2010-06":0.0,"2010-07":-0.1,"2010-08":0.3,"2010-09":0.5,"2010-10":0.1,"2010-11":-0.2,"2010-12":0.0,"2011-01":-1.0,"2011-02":-0.5,"2011-03":-1.0,"2011-04":-1.0,"2011-05":-1.2,"2011-06":-1.2,"2011-07":0.0,"2011-08":-1.4,"2011-09":-0.2,"2011-10":0.1,"2011-11":0.4,"2011-12":0.3,"2012-01":-0.2,"2012-02":-0.5,"2012-03":-0.4,"2012-04":0.1,"2012-05":0.1,"2012-06":-0.1,"2012-07":0.3,"2012-08":-0.2,"2012-09":-1.2,"2012-10":-0.5,"2012-11":-1.0,"2012-12":-1.0,"2013-01":-0.9,"2013-02":-0.4,"2013-03":-0.2,"2013-04":-0.5,"2013-05":0.3,"2013-06":0.2,"2013-07":0.7,"2013-08":1.2,"2013-09":0.7,"2013-10":0.7,"2013-11":0.2,"2013-12":-0.2,"2014-01":0.1,"2014-02":0.6,"2014-03":0.4,"2014-04":0.4,"2014-05":-0.3,"2014-06":-0.4,"2014-07":-1.3,"2014-08":-1.5,"2014-09":-0.1,"2014-10":-0.3,"2014-11":-0.3,"2014-12":-0.5,"2015-01":-0.4,"2015-02":-0.3,"2015-03":-0.8,"2015-04":-0.5,"2015-05":-0.3,"2015-06":-0.6,"2015-07":-1.7,"2015-08":-0.4,"2015-09":-0.7,"2015-10":-0.6,"2015-11":0.0,"2015-12":-0.1,"2016-01":0.2,"2016-02":-0.2,"2016-03":0.0,"2016-04":0.0,"2016-05":0.0,"2016-06":0.4,"2016-07":0.9,"2016-08":1.5,"2016-09":-0.1,"2016-10":0.4,"2016-11":0.1,"2016-12":0.2,"2017-01":0.2,"2017-02":0.3,"2017-03":0.0,"2017-04":-0.1,"2017-05":0.7,"2017-06":0.4,"2017-07":1.5,"2017-08":1.2,"2017-09":0.3,"2017-10":0.5,"2017-11":0.0,"2017-12":-0.4,"2018-01":-0.5,"2018-02":-0.7,"2018-03":-0.3,"2018-04":0.4,"2018-05":0.1,"2018-06":0.4,"2018-07":0.6,"2018-08":-0.1,"2018-09":0.1,"2018-10":-0.5,"2018-11":-0.3,"2018-12":0.6,"2019-01":0.3,"2019-02":0.4,"2019-03":0.6,"2019-04":0.5,"2019-05":0.5,"2019-06":0.0,"2019-07":-0.9,"2019-08":0.1,"2019-09":-0.1,"2019-10":0.2,"2019-11":0.1,"2019-12":0.5,"2020-01":0.6,"2020-02":0.6,"2020-03":0.5,"2020-04":0.2,"2020-05":0.3,"2020-06":0.7,"2020-07":-1.1,"2020-08":0.2,"2020-09":-0.6,"2020-10":-0.2,"2020-11":0.2,"2020-12":0.1,"2021-01":0.1,"2021-02":0.9,"2021-03":0.9,"2021-04":1.4,"2021-05":0.7,"2021-06":1.3,"2021-07":1.0,"2021-08":-0.2,"2021-09":0.4,"2021-10":1.4,"2021-11":-0.2,"2021-12":0.3,"2022-01":0.3,"2022-02":0.2,"2022-03":0.5,"2022-04":1.2,"2022-05":1.0,"2022-06":0.4,"2022-07":1.6,"2022-08":0.9,"2022-09":0.1,"2022-10":0.0,"2022-11":0.0,"2022-12":0.6,"2023-01":0.4,"2023-02":0.6,"2023-03":1.0,"2023-04":1.0,"2023-05":0.6,"2023-06":0.8,"2023-07":0.5,"2023-08":0.8,"2023-09":1.2,"2023-10":0.3,"2023-11":0.5,"2023-12":0.5,"2024-01":0.4,"2024-02":0.8,"2024-03":0.6,"2024-04":1.0,"2024-05":1.0,"2024-06":0.7,"2024-07":0.5,"2024-08":2.3,"2024-09":2.6,"2024-10":1.8,"2024-11":0.9,"2024-12":-0.1,"2025-01":-0.5,"2025-02":-0.7,"2025-03":-0.6,"2025-04":-0.3,"2025-05":-0.6,"2025-06":0.1,"2025-07":1.8,"2025-08":1.1,"2025-09":2.5,"2025-10":2.7,"2025-11":1.2,"2025-12":1.1,"2026-01":0.9,"2026-02":1.0,"2026-03":1.3,"2026-04":1.0,"2026-05":1.4,"2026-06":1.1,"2026-07":0.9,"2026-08":0.6,"2026-09":0.7,"2026-10":1.1,"2026-11":1.0},"east":{"1991-01":-0.3,"1991-02":-0.5,"1991-03":-0.5,"1991-04":-0.2,"1991-05":-0.6,"1991-06":-0.7,"1991-07":-0.8,"1991-08":-1.9,"1991-09":-0.2,"1991-10":-0.6,"1991-11":-0.7,"1991-12":0.0,"1992-01":0.3,"1992-02":0.1,"1992-03":0.3,"1992-04":0.0,"1992-05":-0.3,"1992-06":-0.5,"1992-07":0.1,"1992-08":-1.3,"1992-09":0.2,"1992-10":-0.4,"1992-11":-0.4,"1992-12":-0.3,"1993-01":0.2,"1993-02":-0.3,"1993-03":-0.5,"1993-04":-0.6,"1993-05":-0.6,"1993-06":-1.1,"1993-07":-1.6,"1993-08":-3.2,"1993-09":-1.2,"1993-10":-1.2,"1993-11":-1.4,"1993-12":-1.1,"1994-01":-0.7,"1994-02":-0.6,"1994-03":-0.8,"1994-04":-0.7,"1994-05":-0.6,"1994-06":-0.7,"1994-07":1.5,"1994-08":1.4,"1994-09":0.6,"1994-10":-0.4,"1994-11":-0.3,"1994-12":0.1,"1995-01":0.6,"1995-02":0.4,"1995-03":-0.1,"1995-04":0.0,"1995-05":-0.4,"1995-06":-1.1,"1995-07":-0.5,"1995-08":-0.1,"1995-09":-0.7,"1995-10":-0.1,"1995-11":-0.4,"1995-12":-0.8,"1996-01":-0.2,"1996-02":-0.9,"1996-03":-1.0,"1996-04":-1.6,"1996-05":-1.2,"1996-06":-1.0,"1996-07":-1.6,"1996-08":0.3,"1996-09":-0.1,"1996-10":-0.6,"1996-11":-0.3,"1996-12":-0.4,"1997-01":-0.3,"1997-02":-0.4,"1997-03":0.0,"1997-04":0.0,"1997-05":-0.3,"1997-06":0.5,"1997-07":0.3,"1997-08":-0.5,"1997-09":0.1,"1997-10":-0.5,"1997-11":-0.2,"1997-12":0.1,"1998-01":0.5,"1998-02":0.5,"1998-03":0.7,"1998-04":1.4,"1998-05":1.0,"1998-06":0.7,"1998-07":0.3,"1998-08":0.7,"1998-09":1.1,"1998-10":1.0,"1998-11":0.1,"1998-12":-0.1,"1999-01":0.0,"1999-02":0.1,"1999-03":0.2,"1999-04":0.3,"1999-05":0.1,"1999-06":0.1,"1999-07":-0.5,"1999-08":-0.7,"1999-09":0.2,"1999-10":0.3,"1999-11":0.2,"1999-12":-0.2,"2000-01":0.2,"2000-02":0.0,"2000-03":-0.4,"2000-04":-0.7,"2000-05":-0.7,"2000-06":-0.1,"2000-07":0.8,"2000-08":0.6,"2000-09":-0.6,"2000-10":-0.3,"2000-11":-0.2,"2000-12":0.1,"2001-01":-0.1,"2001-02":0.2,"2001-03":0.0,"2001-04":0.8,"2001-05":0.9,"2001-06":0.1,"2001-07":1.2,"2001-08":1.7,"2001-09":0.5,"2001-10":0.5,"2001-11":0.6,"2001-12":0.0,"2002-01":-0.6,"2002-02":0.3,"2002-03":0.4,"2002-04":0.7,"2002-05":0.0,"2002-06":0.6,"2002-07":0.1,"2002-08":-0.6,"2002-09":-0.4,"2002-10":0.1,"2002-11":-0.7,"2002-12":-0.4,"2003-01":-0.4,"2003-02":-0.2,"2003-03":-0.2,"2003-04":-0.5,"2003-05":0.1,"2003-06":0.2,"2003-07":-1.0,"2003-08":-1.1,"2003-09":-0.4,"2003-10":-0.1,"2003-11":0.0,"2003-12":-0.1,"2004-01":0.2,"2004-02":0.2,"2004-03":0.4,"2004-04":0.4,"2004-05":0.4,"2004-06":0.8,"2004-07":0.6,"2004-08":0.0,"2004-09":-0.2,"2004-10":-1.0,"2004-11":0.1,"2004-12":0.2,"2005-01":0.1,"2005-02":-0.1,"2005-03":-0.6,"2005-04":-0.5,"2005-05":-0.3,"2005-06":0.3,"2005-07":0.6,"2005-08":0.7,"2005-09":-0.3,"2005-10":0.0,"2005-11":0.1,"2005-12":-1.1,"2006-01":-1.1,"2006-02":-0.8,"2006-03":-0.8,"2006-04":-1.0,"2006-05":-0.8,"2006-06":-1.0,"2006-07":-1.4,"2006-08":0.7,"2006-09":-0.7,"2006-10":0.2,"2006-11":0.0,"2006-12":0.0,"2007-01":0.0,"2007-02":0.7,"2007-03":0.5,"2007-04":0.1,"2007-05":-0.1,"2007-06":0.1,"2007-07":-0.5,"2007-08":0.3,"2007-09":0.4,"2007-10":0.6,"2007-11":0.1,"2007-12":0.4,"2008-01":0.2,"2008-02":0.2,"2008-03":0.1,"2008-04":0.1,"2008-05":0.1,"2008-06":-0.3,"2008-07":1.0,"2008-08":-0.2,"2008-09":0.7,"2008-10":0.7,"2008-11":0.3,"2008-12":0.3,"2009-01":0.5,"2009-02":1.1,"2009-03":1.3,"2009-04":0.8,"2009-05":0.4,"2009-06":-0.3,"2009-07":-0.9,"2009-08":-1.5,"2009-09":-0.5,"2009-10":0.0,"2009-11":0.2,"2009-12":0.1,"2010-01":-0.9,"2010-02":-0.2,"2010-03":-0.3,"2010-04":-0.4,"2010-05":0.1,"2010-06":1.1,"2010-07":0.8,"2010-08":0.8,"2010-09":1.0,"2010-10":1.3,"2010-11":1.1,"2010-12":0.9,"2011-01":0.0,"2011-02":-0.4,"2011-03":-1.0,"2011-04":-1.2,"2011-05":-1.1,"2011-06":-0.8,"2011-07":-0.1,"2011-08":-0.2,"2011-09":0.1,"2011-10":0.5,"2011-11":0.9,"2011-12":0.5,"2012-01":0.0,"2012-02":-0.4,"2012-03":-0.4,"2012-04":0.2,"2012-05":0.5,"2012-06":0.4,"2012-07":0.8,"2012-08":0.9,"2012-09":-0.1,"2012-10":-0.4,"2012-11":-0.7,"2012-12":-0.8,"2013-01":-0.7,"2013-02":-0.3,"2013-03":0.1,"2013-04":-0.3,"2013-05":-0.1,"2013-06":1.3,"2013-07":0.3,"2013-08":1.1,"2013-09":0.8,"2013-10":1.0,"2013-11":0.5,"2013-12":-0.4,"2014-01":-0.1,"2014-02":0.5,"2014-03":0.1,"2014-04":0.7,"2014-05":0.0,"2014-06":0.0,"2014-07":0.3,"2014-08":-1.0,"2014-09":0.1,"2014-10":0.1,"2014-11":0.3,"2014-12":-0.2,"2015-01":-0.3,"2015-02":-0.1,"2015-03":-0.7,"2015-04":-0.4,"2015-05":0.0,"2015-06":-0.5,"2015-07":-1.6,"2015-08":-0.5,"2015-09":-1.1,"2015-10":-0.7,"2015-11":-0.3,"2015-12":-0.7,"2016-01":0.1,"2016-02":-0.2,"2016-03":-0.2,"2016-04":0.3,"2016-05":0.2,"2016-06":0.9,"2016-07":0.7,"2016-08":1.4,"2016-09":-0.3,"2016-10":0.2,"2016-11":0.1,"2016-12":0.8,"2017-01":0.9,"2017-02":0.8,"2017-03":0.7,"2017-04":0.5,"2017-05":0.7,"2017-06":0.1,"2017-07":1.0,"2017-08":0.9,"2017-09":0.6,"2017-10":0.6,"2017-11":0.4,"2017-12":-0.6,"2018-01":-0.6,"2018-02":-0.8,"2018-03":-0.5,"2018-04":0.2,"2018-05":-0.1,"2018-06":0.4,"2018-07":1.2,"2018-08":1.3,"2018-09":0.3,"2018-10":-0.2,"2018-11":0.0,"2018-12":0.6,"2019-01":1.0,"2019-02":1.2,"2019-03":1.5,"2019-04":0.9,"2019-05":1.3,"2019-06":0.3,"2019-07":0.0,"2019-08":0.6,"2019-09":0.6,"2019-10":0.3,"2019-11":0.5,"2019-12":0.9,"2020-01":1.0,"2020-02":0.8,"2020-03":0.7,"2020-04":0.7,"2020-05":0.2,"2020-06":0.7,"2020-07":-0.4,"2020-08":-0.7,"2020-09":-0.8,"2020-10":-0.1,"2020-11":0.7,"2020-12":0.9,"2021-01":0.5,"2021-02":1.2,"2021-03":1.3,"2021-04":1.8,"2021-05":0.8,"2021-06":1.0,"2021-07":2.4,"2021-08":1.0,"2021-09":0.5,"2021-10":1.5,"2021-11":0.9,"2021-12":1.1,"2022-01":0.8,"2022-02":0.2,"2022-03":0.5,"2022-04":1.2,"2022-05":1.3,"2022-06":0.8,"2022-07":1.9,"2022-08":0.9,"2022-09":0.8,"2022-10":0.9,"2022-11":1.0,"2022-12":1.2,"2023-01":0.8,"2023-02":1.0,"2023-03":1.7,"2023-04":2.2,"2023-05":1.3,"2023-06":1.3,"2023-07":1.0,"2023-08":1.3,"2023-09":1.9,"2023-10":1.1,"2023-11":1.4,"2023-12":1.3,"2024-01":1.0,"2024-02":0.8,"2024-03":0.8,"2024-04":2.0,"2024-05":1.2,"2024-06":1.3,"2024-07":0.4,"2024-08":2.6,"2024-09":3.1,"2024-10":1.7,"2024-11":1.5,"2024-12":0.7,"2025-01":0.2,"2025-02":-0.4,"2025-03":-0.5,"2025-04":-0.6,"2025-05":-0.4,"2025-06":0.3,"2025-07":2.4,"2025-08":2.2,"2025-09":2.4,"2025-10":1.9,"2025-11":1.1,"2025-12":1.1,"2026-01":1.1,"2026-02":1.1,"2026-03":1.5,"2026-04":1.5,"2026-05":1.7,"2026-06":1.7,"2026-07":1.8,"2026-08":1.8,"2026-09":1.2,"2026-10":1.8,"2026-11":1.6}},"normals":{"west":[8.8,7.4,7.7,9.8,13.6,18.4,22.1,24.7,22.8,19.3,15.3,11.5],"south":[14.7,13.3,13.3,14.3,16.6,19.7,23.3,25.5,24.2,21.8,19.4,16.8],"east":[11.8,10.4,10.5,11.9,14.4,17.7,20.6,23.1,21.7,19.2,16.5,14.0]},"sources":{"west":"서해.xlsx","south":"남해.xlsx","east":"동해.xlsx"},"note":"엑셀의 해역별 월 편차를 그대로 수록. 평년 기준기간은 원본 파일에 명시되지 않음."}</script>
+<script id="embedded-settings" type="application/json">{"start":null,"end":null,"followLatest":true,"recentMode":"same","chartWidthPct":100,"chartHeightPct":100,"savedAt":0}</script>
+<script id="embedded-data" type="application/json">{"version":1,"savedAt":0,"regions":{"west":{"1991-01":0.4,"1991-02":0.1,"1991-03":0.4,"1991-04":0.5,"1991-05":-0.3,"1991-06":-0.2,"1991-07":-0.4,"1991-08":-1.1,"1991-09":-0.4,"1991-10":-0.5,"1991-11":-0.7,"1991-12":0.1,"1992-01":0.5,"1992-02":0.6,"1992-03":0.6,"1992-04":0.9,"1992-05":0.1,"1992-06":-0.4,"1992-07":-0.2,"1992-08":-0.3,"1992-09":-0.7,"1992-10":-0.9,"1992-11":-0.6,"1992-12":-0.2,"1993-01":-0.1,"1993-02":0.2,"1993-03":0.0,"1993-04":-0.5,"1993-05":-0.5,"1993-06":-1.0,"1993-07":-0.9,"1993-08":-1.6,"1993-09":-0.1,"1993-10":-0.1,"1993-11":-0.1,"1993-12":-0.4,"1994-01":-0.2,"1994-02":-0.1,"1994-03":-0.3,"1994-04":-0.1,"1994-05":-0.4,"1994-06":-0.2,"1994-07":1.5,"1994-08":-0.1,"1994-09":0.5,"1994-10":0.0,"1994-11":0.4,"1994-12":0.8,"1995-01":0.7,"1995-02":0.5,"1995-03":0.5,"1995-04":0.1,"1995-05":-0.6,"1995-06":-0.1,"1995-07":0.4,"1995-08":0.3,"1995-09":-0.7,"1995-10":0.4,"1995-11":-0.4,"1995-12":0.1,"1996-01":0.0,"1996-02":0.4,"1996-03":0.3,"1996-04":-0.6,"1996-05":-0.4,"1996-06":0.1,"1996-07":-1.2,"1996-08":0.8,"1996-09":0.7,"1996-10":0.1,"1996-11":0.1,"1996-12":-0.1,"1997-01":0.0,"1997-02":0.3,"1997-03":0.2,"1997-04":-0.1,"1997-05":0.6,"1997-06":0.4,"1997-07":1.4,"1997-08":0.7,"1997-09":0.6,"1997-10":-0.1,"1997-11":0.3,"1997-12":0.4,"1998-01":0.4,"1998-02":0.8,"1998-03":0.7,"1998-04":1.1,"1998-05":0.8,"1998-06":-0.4,"1998-07":0.3,"1998-08":-0.1,"1998-09":0.5,"1998-10":0.8,"1998-11":0.8,"1998-12":0.4,"1999-01":0.6,"1999-02":0.4,"1999-03":0.2,"1999-04":0.2,"1999-05":0.6,"1999-06":0.2,"1999-07":-0.1,"1999-08":-0.6,"1999-09":0.3,"1999-10":0.4,"1999-11":-0.1,"1999-12":-1.1,"2000-01":-0.1,"2000-02":0.5,"2000-03":-0.2,"2000-04":-0.4,"2000-05":-0.6,"2000-06":-0.1,"2000-07":0.2,"2000-08":0.8,"2000-09":-0.4,"2000-10":-0.2,"2000-11":0.1,"2000-12":0.5,"2001-01":-0.1,"2001-02":-0.4,"2001-03":-0.5,"2001-04":-0.1,"2001-05":0.6,"2001-06":0.4,"2001-07":1.3,"2001-08":0.5,"2001-09":0.8,"2001-10":-0.5,"2001-11":0.0,"2001-12":-0.4,"2002-01":0.0,"2002-02":0.7,"2002-03":0.7,"2002-04":0.7,"2002-05":0.1,"2002-06":0.7,"2002-07":-0.3,"2002-08":-0.8,"2002-09":-1.1,"2002-10":-0.3,"2002-11":-0.7,"2002-12":-0.5,"2003-01":-0.5,"2003-02":-0.3,"2003-03":0.1,"2003-04":-0.4,"2003-05":0.6,"2003-06":-0.6,"2003-07":-1.7,"2003-08":-1.4,"2003-09":-0.4,"2003-10":-0.3,"2003-11":0.0,"2003-12":-0.5,"2004-01":-0.3,"2004-02":0.0,"2004-03":0.0,"2004-04":-0.5,"2004-05":0.1,"2004-06":0.0,"2004-07":-0.2,"2004-08":1.1,"2004-09":0.1,"2004-10":-0.1,"2004-11":0.8,"2004-12":1.4,"2005-01":0.5,"2005-02":-0.3,"2005-03":-0.5,"2005-04":0.1,"2005-05":0.0,"2005-06":0.6,"2005-07":0.8,"2005-08":-0.8,"2005-09":-0.7,"2005-10":-0.2,"2005-11":0.2,"2005-12":-0.5,"2006-01":-0.7,"2006-02":-0.4,"2006-03":-0.5,"2006-04":-1.1,"2006-05":-0.2,"2006-06":-0.6,"2006-07":-0.1,"2006-08":1.2,"2006-09":-0.2,"2006-10":1.5,"2006-11":1.0,"2006-12":0.5,"2007-01":0.0,"2007-02":0.8,"2007-03":0.9,"2007-04":0.1,"2007-05":0.3,"2007-06":-0.1,"2007-07":-0.2,"2007-08":0.4,"2007-09":0.1,"2007-10":0.1,"2007-11":-0.2,"2007-12":0.3,"2008-01":-0.4,"2008-02":-0.4,"2008-03":-0.5,"2008-04":-0.2,"2008-05":-0.2,"2008-06":-0.8,"2008-07":0.1,"2008-08":0.1,"2008-09":0.3,"2008-10":0.2,"2008-11":0.1,"2008-12":-0.5,"2009-01":-0.5,"2009-02":0.3,"2009-03":0.2,"2009-04":1.0,"2009-05":0.6,"2009-06":0.0,"2009-07":-0.7,"2009-08":-1.1,"2009-09":-0.1,"2009-10":0.5,"2009-11":0.3,"2009-12":-0.4,"2010-01":-0.7,"2010-02":-1.0,"2010-03":-0.5,"2010-04":-0.9,"2010-05":-1.0,"2010-06":0.0,"2010-07":0.3,"2010-08":0.5,"2010-09":0.5,"2010-10":-0.3,"2010-11":-0.8,"2010-12":-0.7,"2011-01":-1.2,"2011-02":-0.9,"2011-03":-1.0,"2011-04":-0.9,"2011-05":-1.0,"2011-06":-1.3,"2011-07":-0.8,"2011-08":-2.2,"2011-09":-1.7,"2011-10":-1.0,"2011-11":0.2,"2011-12":0.4,"2012-01":-0.2,"2012-02":-0.7,"2012-03":-0.9,"2012-04":-0.8,"2012-05":0.1,"2012-06":1.3,"2012-07":0.9,"2012-08":-0.1,"2012-09":-1.0,"2012-10":-0.1,"2012-11":-1.0,"2012-12":-1.2,"2013-01":-1.0,"2013-02":-0.7,"2013-03":-0.6,"2013-04":-1.4,"2013-05":-0.6,"2013-06":-0.1,"2013-07":0.4,"2013-08":1.5,"2013-09":0.2,"2013-10":0.1,"2013-11":-0.3,"2013-12":0.0,"2014-01":0.3,"2014-02":0.6,"2014-03":0.5,"2014-04":1.4,"2014-05":0.4,"2014-06":0.5,"2014-07":-0.8,"2014-08":-1.4,"2014-09":0.2,"2014-10":0.1,"2014-11":0.4,"2014-12":0.1,"2015-01":0.2,"2015-02":0.1,"2015-03":-0.1,"2015-04":0.0,"2015-05":0.5,"2015-06":0.2,"2015-07":-0.3,"2015-08":0.1,"2015-09":0.2,"2015-10":0.1,"2015-11":0.9,"2015-12":0.0,"2016-01":0.2,"2016-02":-0.5,"2016-03":-0.2,"2016-04":0.0,"2016-05":-0.1,"2016-06":0.5,"2016-07":0.3,"2016-08":1.4,"2016-09":0.1,"2016-10":0.3,"2016-11":-0.6,"2016-12":-0.3,"2017-01":0.0,"2017-02":-0.2,"2017-03":-0.2,"2017-04":0.3,"2017-05":1.1,"2017-06":0.6,"2017-07":1.7,"2017-08":1.0,"2017-09":-0.3,"2017-10":-0.2,"2017-11":-0.7,"2017-12":-0.7,"2018-01":-0.7,"2018-02":-1.6,"2018-03":-1.0,"2018-04":-0.4,"2018-05":0.0,"2018-06":0.3,"2018-07":1.0,"2018-08":1.5,"2018-09":1.0,"2018-10":0.0,"2018-11":0.2,"2018-12":0.5,"2019-01":-0.1,"2019-02":-0.2,"2019-03":0.1,"2019-04":0.1,"2019-05":0.4,"2019-06":-0.5,"2019-07":-0.3,"2019-08":0.4,"2019-09":-0.2,"2019-10":0.7,"2019-11":0.5,"2019-12":0.4,"2020-01":0.8,"2020-02":0.7,"2020-03":0.7,"2020-04":0.2,"2020-05":-0.2,"2020-06":0.4,"2020-07":-1.5,"2020-08":-1.0,"2020-09":0.2,"2020-10":0.2,"2020-11":0.7,"2020-12":0.6,"2021-01":0.1,"2021-02":0.6,"2021-03":0.9,"2021-04":0.7,"2021-05":0.3,"2021-06":0.6,"2021-07":1.4,"2021-08":0.8,"2021-09":0.9,"2021-10":1.5,"2021-11":1.2,"2021-12":1.4,"2022-01":1.0,"2022-02":0.5,"2022-03":0.2,"2022-04":0.3,"2022-05":0.7,"2022-06":0.6,"2022-07":1.7,"2022-08":0.8,"2022-09":-0.9,"2022-10":-0.8,"2022-11":0.5,"2022-12":0.8,"2023-01":0.7,"2023-02":0.5,"2023-03":0.4,"2023-04":0.6,"2023-05":0.5,"2023-06":0.7,"2023-07":1.0,"2023-08":2.1,"2023-09":1.5,"2023-10":0.6,"2023-11":1.1,"2023-12":1.0,"2024-01":1.3,"2024-02":1.4,"2024-03":1.0,"2024-04":1.4,"2024-05":1.4,"2024-06":2.0,"2024-07":0.6,"2024-08":2.8,"2024-09":3.8,"2024-10":2.2,"2024-11":1.7,"2024-12":1.1,"2025-01":0.9,"2025-02":0.5,"2025-03":0.0,"2025-04":-0.4,"2025-05":-0.6,"2025-06":0.0,"2025-07":2.4,"2025-08":2.4,"2025-09":2.8,"2025-10":1.7,"2025-11":0.6,"2025-12":1.0,"2026-01":0.5,"2026-02":0.5,"2026-03":0.7,"2026-04":0.4,"2026-05":0.9,"2026-06":1.2,"2026-07":1.1,"2026-08":2.3,"2026-09":2.0,"2026-10":1.5,"2026-11":1.2},"south":{"1991-01":-0.1,"1991-02":-0.4,"1991-03":0.0,"1991-04":0.2,"1991-05":-0.8,"1991-06":-0.7,"1991-07":-0.5,"1991-08":-1.3,"1991-09":-0.4,"1991-10":-1.0,"1991-11":-0.9,"1991-12":-0.2,"1992-01":-0.1,"1992-02":0.2,"1992-03":0.1,"1992-04":0.3,"1992-05":-0.3,"1992-06":-0.3,"1992-07":-0.7,"1992-08":-0.4,"1992-09":-0.1,"1992-10":-0.6,"1992-11":-0.4,"1992-12":-0.2,"1993-01":-0.1,"1993-02":-0.2,"1993-03":0.0,"1993-04":-0.2,"1993-05":-0.7,"1993-06":-0.9,"1993-07":-1.6,"1993-08":-1.7,"1993-09":-0.9,"1993-10":-0.9,"1993-11":-0.4,"1993-12":-0.2,"1994-01":-0.2,"1994-02":-0.3,"1994-03":-0.4,"1994-04":-0.2,"1994-05":-0.2,"1994-06":0.0,"1994-07":2.0,"1994-08":0.0,"1994-09":0.2,"1994-10":-0.3,"1994-11":0.0,"1994-12":0.3,"1995-01":0.7,"1995-02":0.0,"1995-03":0.0,"1995-04":-0.3,"1995-05":-0.7,"1995-06":-0.8,"1995-07":-0.5,"1995-08":0.3,"1995-09":-0.1,"1995-10":-0.1,"1995-11":-0.3,"1995-12":-0.6,"1996-01":-0.5,"1996-02":-0.6,"1996-03":-0.4,"1996-04":-0.7,"1996-05":-0.2,"1996-06":0.2,"1996-07":-0.5,"1996-08":0.5,"1996-09":0.4,"1996-10":0.0,"1996-11":0.8,"1996-12":0.3,"1997-01":0.3,"1997-02":0.4,"1997-03":0.5,"1997-04":0.2,"1997-05":0.4,"1997-06":0.5,"1997-07":0.2,"1997-08":-0.6,"1997-09":-0.1,"1997-10":-0.5,"1997-11":0.2,"1997-12":0.4,"1998-01":0.3,"1998-02":0.5,"1998-03":0.6,"1998-04":1.1,"1998-05":1.0,"1998-06":0.3,"1998-07":1.0,"1998-08":1.0,"1998-09":0.3,"1998-10":0.6,"1998-11":0.4,"1998-12":0.6,"1999-01":0.4,"1999-02":0.6,"1999-03":0.3,"1999-04":0.3,"1999-05":0.5,"1999-06":0.2,"1999-07":-1.4,"1999-08":-1.8,"1999-09":0.1,"1999-10":0.4,"1999-11":-0.1,"1999-12":-0.5,"2000-01":0.3,"2000-02":0.2,"2000-03":-0.5,"2000-04":-0.6,"2000-05":0.0,"2000-06":-0.1,"2000-07":0.8,"2000-08":0.5,"2000-09":-0.1,"2000-10":0.4,"2000-11":0.3,"2000-12":0.4,"2001-01":0.5,"2001-02":0.4,"2001-03":0.3,"2001-04":0.9,"2001-05":0.7,"2001-06":0.1,"2001-07":1.5,"2001-08":1.3,"2001-09":-0.1,"2001-10":0.2,"2001-11":0.0,"2001-12":0.0,"2002-01":-0.5,"2002-02":0.3,"2002-03":0.1,"2002-04":0.3,"2002-05":0.3,"2002-06":1.2,"2002-07":-0.7,"2002-08":-0.6,"2002-09":-0.6,"2002-10":0.1,"2002-11":-0.4,"2002-12":-0.3,"2003-01":-0.3,"2003-02":-0.1,"2003-03":-0.1,"2003-04":-0.5,"2003-05":0.2,"2003-06":-0.3,"2003-07":-0.9,"2003-08":-0.3,"2003-09":0.4,"2003-10":-0.1,"2003-11":0.3,"2003-12":0.3,"2004-01":0.1,"2004-02":0.0,"2004-03":0.0,"2004-04":0.2,"2004-05":0.2,"2004-06":0.9,"2004-07":0.8,"2004-08":0.8,"2004-09":-0.1,"2004-10":-0.4,"2004-11":0.0,"2004-12":1.0,"2005-01":0.5,"2005-02":0.0,"2005-03":-0.3,"2005-04":0.5,"2005-05":0.4,"2005-06":1.2,"2005-07":1.1,"2005-08":0.3,"2005-09":0.3,"2005-10":0.8,"2005-11":0.6,"2005-12":-0.4,"2006-01":-0.6,"2006-02":-0.2,"2006-03":-0.2,"2006-04":-0.6,"2006-05":-0.9,"2006-06":-0.7,"2006-07":-0.5,"2006-08":1.2,"2006-09":0.0,"2006-10":0.6,"2006-11":0.7,"2006-12":0.6,"2007-01":0.1,"2007-02":0.7,"2007-03":0.6,"2007-04":0.1,"2007-05":0.1,"2007-06":0.1,"2007-07":-0.3,"2007-08":0.6,"2007-09":0.6,"2007-10":0.7,"2007-11":-0.2,"2007-12":0.0,"2008-01":0.0,"2008-02":-0.1,"2008-03":-0.3,"2008-04":-0.3,"2008-05":0.1,"2008-06":-0.7,"2008-07":0.8,"2008-08":0.3,"2008-09":0.2,"2008-10":0.6,"2008-11":0.2,"2008-12":0.1,"2009-01":-0.3,"2009-02":0.4,"2009-03":0.6,"2009-04":0.7,"2009-05":0.5,"2009-06":0.0,"2009-07":-0.2,"2009-08":-1.0,"2009-09":0.0,"2009-10":0.1,"2009-11":-0.1,"2009-12":0.0,"2010-01":-0.6,"2010-02":-0.3,"2010-03":-0.4,"2010-04":-0.5,"2010-05":-0.1,"2010-06":0.0,"2010-07":-0.1,"2010-08":0.3,"2010-09":0.5,"2010-10":0.1,"2010-11":-0.2,"2010-12":0.0,"2011-01":-1.0,"2011-02":-0.5,"2011-03":-1.0,"2011-04":-1.0,"2011-05":-1.2,"2011-06":-1.2,"2011-07":0.0,"2011-08":-1.4,"2011-09":-0.2,"2011-10":0.1,"2011-11":0.4,"2011-12":0.3,"2012-01":-0.2,"2012-02":-0.5,"2012-03":-0.4,"2012-04":0.1,"2012-05":0.1,"2012-06":-0.1,"2012-07":0.3,"2012-08":-0.2,"2012-09":-1.2,"2012-10":-0.5,"2012-11":-1.0,"2012-12":-1.0,"2013-01":-0.9,"2013-02":-0.4,"2013-03":-0.2,"2013-04":-0.5,"2013-05":0.3,"2013-06":0.2,"2013-07":0.7,"2013-08":1.2,"2013-09":0.7,"2013-10":0.7,"2013-11":0.2,"2013-12":-0.2,"2014-01":0.1,"2014-02":0.6,"2014-03":0.4,"2014-04":0.4,"2014-05":-0.3,"2014-06":-0.4,"2014-07":-1.3,"2014-08":-1.5,"2014-09":-0.1,"2014-10":-0.3,"2014-11":-0.3,"2014-12":-0.5,"2015-01":-0.4,"2015-02":-0.3,"2015-03":-0.8,"2015-04":-0.5,"2015-05":-0.3,"2015-06":-0.6,"2015-07":-1.7,"2015-08":-0.4,"2015-09":-0.7,"2015-10":-0.6,"2015-11":0.0,"2015-12":-0.1,"2016-01":0.2,"2016-02":-0.2,"2016-03":0.0,"2016-04":0.0,"2016-05":0.0,"2016-06":0.4,"2016-07":0.9,"2016-08":1.5,"2016-09":-0.1,"2016-10":0.4,"2016-11":0.1,"2016-12":0.2,"2017-01":0.2,"2017-02":0.3,"2017-03":0.0,"2017-04":-0.1,"2017-05":0.7,"2017-06":0.4,"2017-07":1.5,"2017-08":1.2,"2017-09":0.3,"2017-10":0.5,"2017-11":0.0,"2017-12":-0.4,"2018-01":-0.5,"2018-02":-0.7,"2018-03":-0.3,"2018-04":0.4,"2018-05":0.1,"2018-06":0.4,"2018-07":0.6,"2018-08":-0.1,"2018-09":0.1,"2018-10":-0.5,"2018-11":-0.3,"2018-12":0.6,"2019-01":0.3,"2019-02":0.4,"2019-03":0.6,"2019-04":0.5,"2019-05":0.5,"2019-06":0.0,"2019-07":-0.9,"2019-08":0.1,"2019-09":-0.1,"2019-10":0.2,"2019-11":0.1,"2019-12":0.5,"2020-01":0.6,"2020-02":0.6,"2020-03":0.5,"2020-04":0.2,"2020-05":0.3,"2020-06":0.7,"2020-07":-1.1,"2020-08":0.2,"2020-09":-0.6,"2020-10":-0.2,"2020-11":0.2,"2020-12":0.1,"2021-01":0.1,"2021-02":0.9,"2021-03":0.9,"2021-04":1.4,"2021-05":0.7,"2021-06":1.3,"2021-07":1.0,"2021-08":-0.2,"2021-09":0.4,"2021-10":1.4,"2021-11":-0.2,"2021-12":0.3,"2022-01":0.3,"2022-02":0.2,"2022-03":0.5,"2022-04":1.2,"2022-05":1.0,"2022-06":0.4,"2022-07":1.6,"2022-08":0.9,"2022-09":0.1,"2022-10":0.0,"2022-11":0.0,"2022-12":0.6,"2023-01":0.4,"2023-02":0.6,"2023-03":1.0,"2023-04":1.0,"2023-05":0.6,"2023-06":0.8,"2023-07":0.5,"2023-08":0.8,"2023-09":1.2,"2023-10":0.3,"2023-11":0.5,"2023-12":0.5,"2024-01":0.4,"2024-02":0.8,"2024-03":0.6,"2024-04":1.0,"2024-05":1.0,"2024-06":0.7,"2024-07":0.5,"2024-08":2.3,"2024-09":2.6,"2024-10":1.8,"2024-11":0.9,"2024-12":-0.1,"2025-01":-0.5,"2025-02":-0.7,"2025-03":-0.6,"2025-04":-0.3,"2025-05":-0.6,"2025-06":0.1,"2025-07":1.8,"2025-08":1.1,"2025-09":2.5,"2025-10":2.7,"2025-11":1.2,"2025-12":1.1,"2026-01":0.9,"2026-02":1.0,"2026-03":1.3,"2026-04":1.0,"2026-05":1.4,"2026-06":1.1,"2026-07":0.9,"2026-08":0.6,"2026-09":0.7,"2026-10":1.1,"2026-11":1.0},"east":{"1991-01":-0.3,"1991-02":-0.5,"1991-03":-0.5,"1991-04":-0.2,"1991-05":-0.6,"1991-06":-0.7,"1991-07":-0.8,"1991-08":-1.9,"1991-09":-0.2,"1991-10":-0.6,"1991-11":-0.7,"1991-12":0.0,"1992-01":0.3,"1992-02":0.1,"1992-03":0.3,"1992-04":0.0,"1992-05":-0.3,"1992-06":-0.5,"1992-07":0.1,"1992-08":-1.3,"1992-09":0.2,"1992-10":-0.4,"1992-11":-0.4,"1992-12":-0.3,"1993-01":0.2,"1993-02":-0.3,"1993-03":-0.5,"1993-04":-0.6,"1993-05":-0.6,"1993-06":-1.1,"1993-07":-1.6,"1993-08":-3.2,"1993-09":-1.2,"1993-10":-1.2,"1993-11":-1.4,"1993-12":-1.1,"1994-01":-0.7,"1994-02":-0.6,"1994-03":-0.8,"1994-04":-0.7,"1994-05":-0.6,"1994-06":-0.7,"1994-07":1.5,"1994-08":1.4,"1994-09":0.6,"1994-10":-0.4,"1994-11":-0.3,"1994-12":0.1,"1995-01":0.6,"1995-02":0.4,"1995-03":-0.1,"1995-04":0.0,"1995-05":-0.4,"1995-06":-1.1,"1995-07":-0.5,"1995-08":-0.1,"1995-09":-0.7,"1995-10":-0.1,"1995-11":-0.4,"1995-12":-0.8,"1996-01":-0.2,"1996-02":-0.9,"1996-03":-1.0,"1996-04":-1.6,"1996-05":-1.2,"1996-06":-1.0,"1996-07":-1.6,"1996-08":0.3,"1996-09":-0.1,"1996-10":-0.6,"1996-11":-0.3,"1996-12":-0.4,"1997-01":-0.3,"1997-02":-0.4,"1997-03":0.0,"1997-04":0.0,"1997-05":-0.3,"1997-06":0.5,"1997-07":0.3,"1997-08":-0.5,"1997-09":0.1,"1997-10":-0.5,"1997-11":-0.2,"1997-12":0.1,"1998-01":0.5,"1998-02":0.5,"1998-03":0.7,"1998-04":1.4,"1998-05":1.0,"1998-06":0.7,"1998-07":0.3,"1998-08":0.7,"1998-09":1.1,"1998-10":1.0,"1998-11":0.1,"1998-12":-0.1,"1999-01":0.0,"1999-02":0.1,"1999-03":0.2,"1999-04":0.3,"1999-05":0.1,"1999-06":0.1,"1999-07":-0.5,"1999-08":-0.7,"1999-09":0.2,"1999-10":0.3,"1999-11":0.2,"1999-12":-0.2,"2000-01":0.2,"2000-02":0.0,"2000-03":-0.4,"2000-04":-0.7,"2000-05":-0.7,"2000-06":-0.1,"2000-07":0.8,"2000-08":0.6,"2000-09":-0.6,"2000-10":-0.3,"2000-11":-0.2,"2000-12":0.1,"2001-01":-0.1,"2001-02":0.2,"2001-03":0.0,"2001-04":0.8,"2001-05":0.9,"2001-06":0.1,"2001-07":1.2,"2001-08":1.7,"2001-09":0.5,"2001-10":0.5,"2001-11":0.6,"2001-12":0.0,"2002-01":-0.6,"2002-02":0.3,"2002-03":0.4,"2002-04":0.7,"2002-05":0.0,"2002-06":0.6,"2002-07":0.1,"2002-08":-0.6,"2002-09":-0.4,"2002-10":0.1,"2002-11":-0.7,"2002-12":-0.4,"2003-01":-0.4,"2003-02":-0.2,"2003-03":-0.2,"2003-04":-0.5,"2003-05":0.1,"2003-06":0.2,"2003-07":-1.0,"2003-08":-1.1,"2003-09":-0.4,"2003-10":-0.1,"2003-11":0.0,"2003-12":-0.1,"2004-01":0.2,"2004-02":0.2,"2004-03":0.4,"2004-04":0.4,"2004-05":0.4,"2004-06":0.8,"2004-07":0.6,"2004-08":0.0,"2004-09":-0.2,"2004-10":-1.0,"2004-11":0.1,"2004-12":0.2,"2005-01":0.1,"2005-02":-0.1,"2005-03":-0.6,"2005-04":-0.5,"2005-05":-0.3,"2005-06":0.3,"2005-07":0.6,"2005-08":0.7,"2005-09":-0.3,"2005-10":0.0,"2005-11":0.1,"2005-12":-1.1,"2006-01":-1.1,"2006-02":-0.8,"2006-03":-0.8,"2006-04":-1.0,"2006-05":-0.8,"2006-06":-1.0,"2006-07":-1.4,"2006-08":0.7,"2006-09":-0.7,"2006-10":0.2,"2006-11":0.0,"2006-12":0.0,"2007-01":0.0,"2007-02":0.7,"2007-03":0.5,"2007-04":0.1,"2007-05":-0.1,"2007-06":0.1,"2007-07":-0.5,"2007-08":0.3,"2007-09":0.4,"2007-10":0.6,"2007-11":0.1,"2007-12":0.4,"2008-01":0.2,"2008-02":0.2,"2008-03":0.1,"2008-04":0.1,"2008-05":0.1,"2008-06":-0.3,"2008-07":1.0,"2008-08":-0.2,"2008-09":0.7,"2008-10":0.7,"2008-11":0.3,"2008-12":0.3,"2009-01":0.5,"2009-02":1.1,"2009-03":1.3,"2009-04":0.8,"2009-05":0.4,"2009-06":-0.3,"2009-07":-0.9,"2009-08":-1.5,"2009-09":-0.5,"2009-10":0.0,"2009-11":0.2,"2009-12":0.1,"2010-01":-0.9,"2010-02":-0.2,"2010-03":-0.3,"2010-04":-0.4,"2010-05":0.1,"2010-06":1.1,"2010-07":0.8,"2010-08":0.8,"2010-09":1.0,"2010-10":1.3,"2010-11":1.1,"2010-12":0.9,"2011-01":0.0,"2011-02":-0.4,"2011-03":-1.0,"2011-04":-1.2,"2011-05":-1.1,"2011-06":-0.8,"2011-07":-0.1,"2011-08":-0.2,"2011-09":0.1,"2011-10":0.5,"2011-11":0.9,"2011-12":0.5,"2012-01":0.0,"2012-02":-0.4,"2012-03":-0.4,"2012-04":0.2,"2012-05":0.5,"2012-06":0.4,"2012-07":0.8,"2012-08":0.9,"2012-09":-0.1,"2012-10":-0.4,"2012-11":-0.7,"2012-12":-0.8,"2013-01":-0.7,"2013-02":-0.3,"2013-03":0.1,"2013-04":-0.3,"2013-05":-0.1,"2013-06":1.3,"2013-07":0.3,"2013-08":1.1,"2013-09":0.8,"2013-10":1.0,"2013-11":0.5,"2013-12":-0.4,"2014-01":-0.1,"2014-02":0.5,"2014-03":0.1,"2014-04":0.7,"2014-05":0.0,"2014-06":0.0,"2014-07":0.3,"2014-08":-1.0,"2014-09":0.1,"2014-10":0.1,"2014-11":0.3,"2014-12":-0.2,"2015-01":-0.3,"2015-02":-0.1,"2015-03":-0.7,"2015-04":-0.4,"2015-05":0.0,"2015-06":-0.5,"2015-07":-1.6,"2015-08":-0.5,"2015-09":-1.1,"2015-10":-0.7,"2015-11":-0.3,"2015-12":-0.7,"2016-01":0.1,"2016-02":-0.2,"2016-03":-0.2,"2016-04":0.3,"2016-05":0.2,"2016-06":0.9,"2016-07":0.7,"2016-08":1.4,"2016-09":-0.3,"2016-10":0.2,"2016-11":0.1,"2016-12":0.8,"2017-01":0.9,"2017-02":0.8,"2017-03":0.7,"2017-04":0.5,"2017-05":0.7,"2017-06":0.1,"2017-07":1.0,"2017-08":0.9,"2017-09":0.6,"2017-10":0.6,"2017-11":0.4,"2017-12":-0.6,"2018-01":-0.6,"2018-02":-0.8,"2018-03":-0.5,"2018-04":0.2,"2018-05":-0.1,"2018-06":0.4,"2018-07":1.2,"2018-08":1.3,"2018-09":0.3,"2018-10":-0.2,"2018-11":0.0,"2018-12":0.6,"2019-01":1.0,"2019-02":1.2,"2019-03":1.5,"2019-04":0.9,"2019-05":1.3,"2019-06":0.3,"2019-07":0.0,"2019-08":0.6,"2019-09":0.6,"2019-10":0.3,"2019-11":0.5,"2019-12":0.9,"2020-01":1.0,"2020-02":0.8,"2020-03":0.7,"2020-04":0.7,"2020-05":0.2,"2020-06":0.7,"2020-07":-0.4,"2020-08":-0.7,"2020-09":-0.8,"2020-10":-0.1,"2020-11":0.7,"2020-12":0.9,"2021-01":0.5,"2021-02":1.2,"2021-03":1.3,"2021-04":1.8,"2021-05":0.8,"2021-06":1.0,"2021-07":2.4,"2021-08":1.0,"2021-09":0.5,"2021-10":1.5,"2021-11":0.9,"2021-12":1.1,"2022-01":0.8,"2022-02":0.2,"2022-03":0.5,"2022-04":1.2,"2022-05":1.3,"2022-06":0.8,"2022-07":1.9,"2022-08":0.9,"2022-09":0.8,"2022-10":0.9,"2022-11":1.0,"2022-12":1.2,"2023-01":0.8,"2023-02":1.0,"2023-03":1.7,"2023-04":2.2,"2023-05":1.3,"2023-06":1.3,"2023-07":1.0,"2023-08":1.3,"2023-09":1.9,"2023-10":1.1,"2023-11":1.4,"2023-12":1.3,"2024-01":1.0,"2024-02":0.8,"2024-03":0.8,"2024-04":2.0,"2024-05":1.2,"2024-06":1.3,"2024-07":0.4,"2024-08":2.6,"2024-09":3.1,"2024-10":1.7,"2024-11":1.5,"2024-12":0.7,"2025-01":0.2,"2025-02":-0.4,"2025-03":-0.5,"2025-04":-0.6,"2025-05":-0.4,"2025-06":0.3,"2025-07":2.4,"2025-08":2.2,"2025-09":2.4,"2025-10":1.9,"2025-11":1.1,"2025-12":1.1,"2026-01":1.1,"2026-02":1.1,"2026-03":1.5,"2026-04":1.5,"2026-05":1.7,"2026-06":1.7,"2026-07":1.8,"2026-08":1.8,"2026-09":1.2,"2026-10":1.8,"2026-11":1.6}},"normals":{"west":[8.8,7.4,7.7,9.8,13.6,18.4,22.1,24.7,22.8,19.3,15.3,11.5],"south":[14.7,13.3,13.3,14.3,16.6,19.7,23.3,25.5,24.2,21.8,19.4,16.8],"east":[11.8,10.4,10.5,11.9,14.4,17.7,20.6,23.1,21.7,19.2,16.5,14.0]},"sources":{"west":"서해.xlsx","south":"남해.xlsx","east":"동해.xlsx"},"note":"엑셀의 해역별 월 편차를 그대로 수록. 평년 기준기간은 원본 파일에 명시되지 않음."}</script>
+<script>
+(()=>{
+'use strict';
+const IDS=['west','south','east'];
+const LABELS={west:'서해',south:'남해',east:'동해'};
+const COLORS={west:'#1275a8',south:'#1275a8',east:'#1275a8'};
+const STORAGE='marine-sst-monthly-anomaly-dashboard-v1';
+const SETTINGS_STORAGE=STORAGE+'-date-range-v2';
+const byId=s=>document.getElementById(s);
+const clone=o=>JSON.parse(JSON.stringify(o));
+const original=JSON.parse(byId('original-data').textContent);
+const base=JSON.parse(byId('embedded-data').textContent);
+let db=clone(base), toastTimer;
+let settings={start:null,end:null,followLatest:true,recentMode:'same',chartWidthPct:100,chartHeightPct:100,savedAt:0};
+try{
+ const embedded=JSON.parse(byId('embedded-settings').textContent);
+ if(embedded&&typeof embedded==='object') settings={...settings,...embedded};
+ const localSettings=JSON.parse(localStorage.getItem(SETTINGS_STORAGE)||'null');
+ if(localSettings&&typeof localSettings==='object'&&(Number(localSettings.savedAt)||0)>(Number(settings.savedAt)||0))settings={...settings,...localSettings};
+}catch(e){/* localStorage 차단 시 HTML에 내장된 설정 사용 */}
+
+try{
+ const local=JSON.parse(localStorage.getItem(STORAGE)||'null');
+ if(local&&isValidDB(local)&&(Number(local.savedAt)||0)>(Number(base.savedAt)||0)) db=local;
+}catch(e){/* file:// 환경에서는 localStorage가 차단될 수 있음 */}
+function isValidDB(d){return d&&d.regions&&IDS.every(k=>d.regions[k]&&typeof d.regions[k]==='object')&&d.normals&&IDS.every(k=>Array.isArray(d.normals[k])&&d.normals[k].length===12)}
+const isMonth=s=>/^\d{4}-(0[1-9]|1[0-2])$/.test(s);
+const monthNum=s=>Number(s.slice(0,4))*12+Number(s.slice(5,7))-1;
+const monthKey=n=>`${Math.floor(n/12)}-${String(n%12+1).padStart(2,'0')}`;
+const shortDate=s=>s.replace('-','.');
+const rangeText=(s,e)=>`${shortDate(s)}–${shortDate(e)}`;
+const numSign=n=>n>0?'+':'';
+const fmt=(n,dec=2)=>Number.isFinite(n)?`${numSign(Math.abs(n)<0.5*10**(-dec)?0:n)}${(Math.abs(n)<0.5*10**(-dec)?0:n).toFixed(dec)}`:'—';
+const fmtBare=(n,dec=1)=>Number.isFinite(n)?n.toFixed(dec):'—';
+const cls=n=>n>0?'positive':n<0?'negative':'zero';
+function notify(text){const t=byId('toast');t.textContent=text;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3500)}
+function allKeys(){return [...new Set(IDS.flatMap(k=>Object.keys(db.regions[k]).filter(isMonth)))].sort()}
+function latest(){const keys=allKeys();return keys.length?keys[keys.length-1]:null}
+function earliest(){const keys=allKeys();return keys.length?keys[0]:null}
+function datesInWindow(last,first){
+ if(!last)return {start:null,end:null,isPartial:false};
+ const n=monthNum(last),requestedStart=monthKey(n-(byId('recentMode').value==='same'?108:119));
+ const start=first>requestedStart?first:requestedStart;
+ return {start,end:last,requestedStart,isPartial:start>requestedStart};
+}
+function seriesFor(k,start,end){return Object.entries(db.regions[k]).filter(([date,val])=>isMonth(date)&&Number.isFinite(val)&&date>=start&&date<=end).map(([date,val])=>({date,x:monthNum(date),y:val})).sort((a,b)=>a.x-b.x)}
+function regression(series){const n=series.length;if(n<2)return null;let sx=0,sy=0;for(const p of series){sx+=p.x;sy+=p.y}const mx=sx/n,my=sy/n;let xx=0,xy=0;for(const p of series){xx+=(p.x-mx)**2;xy+=(p.x-mx)*(p.y-my)}if(!xx)return null;const slope=xy/xx;return {slope, intercept:my-slope*mx, at:x=>my+slope*(x-mx)}}
+const avg=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:NaN;
+function metrics(k,range,win){
+ const s=seriesFor(k,range.start,range.end), recent=s.filter(p=>p.date>=win.start&&p.date<=win.end);
+ const last=s.at(-1); const lastMon=last?.date.slice(5);const comps=recent.filter(p=>p.date.slice(5)===lastMon).map(p=>p.y);
+ const baseline=seriesFor(k,'1991-01','2020-12');
+ const regAll=regression(s),regRecent=regression(recent);
+ return {s,recent,last,regAll,regRecent,trendFull:regAll?regAll.slope*420:NaN,trendRecent:regRecent?regRecent.slope*120:NaN,meanFull:avg(s.map(p=>p.y)),meanBaseline:avg(baseline.map(p=>p.y)),meanRecent:avg(recent.map(p=>p.y)),lastVsNorm:last?.y??NaN,lastVsDecade:last?last.y-avg(comps):NaN,monthsSame:comps.length};
+}
+function pointPath(series,xFn,yFn){let path='',prev=null;for(const p of series){const cmd=(prev&&p.x-prev.x===1)?'L':'M';path+=`${cmd}${xFn(p.x).toFixed(2)},${yFn(p.y).toFixed(2)} `;prev=p}return path.trim()}
+function svgText(x,y,content,opts=''){return `<text x="${x}" y="${y}" ${opts}>${content}</text>`}
+function buildGraph(k,M,lo,hi,win){
+ const W=Math.round(1140*settings.chartWidthPct/100),H=Math.round(292*settings.chartHeightPct/100),L=56,R=22,T=15,B=35, pw=W-L-R,ph=H-T-B;
+ const x=n=>L+(n-lo)/(hi-lo||1)*pw;
+ const rawMax=Math.max(4,...M.s.map(p=>Math.abs(p.y)));const yBound=Math.max(4,Math.ceil(rawMax));const bot=-yBound,top=yBound;
+ const y=v=>T+(top-v)/(top-bot)*ph;
+ const mkLine=(x1,y1,x2,y2,style='')=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" ${style}/>`;
+ // 사용자가 선택한 구간의 길이에 따라 X축 연월 눈금 간격 자동 선택
+ const span=hi-lo;
+ const tickEvery=span<=12?1:span<=36?3:span<=84?6:span<=240?12:span<=360?24:48;
+ let grid='',ticks='';
+ const tickLabel=n=>{const yr=Math.floor(n/12),mo=n%12+1;return tickEvery<12?`${String(yr).slice(-2)}.${String(mo).padStart(2,'0')}`:String(yr)};
+ for(let n=Math.ceil(lo/tickEvery)*tickEvery;n<=hi;n+=tickEvery){
+  const px=x(n).toFixed(2);
+  grid+=mkLine(px,T,px,T+ph,`stroke="#e1e7eb" stroke-width="0.8" stroke-dasharray="5 5"`);
+  ticks+=svgText(px,H-12,tickLabel(n),`fill="#111111" font-size="12" text-anchor="middle"`);
+ }
+ for(let v=bot;v<=top;v+=(yBound>6?2:1)){
+   grid+=mkLine(L,y(v).toFixed(2),W-R,y(v).toFixed(2),v===0?'stroke="#8097a8" stroke-width="1.45"':'stroke="#cdd6dd" stroke-width="1" stroke-dasharray="6 5"');
+   ticks+=svgText(L-12,(y(v)+4).toFixed(2),v,`fill="#111111" font-size="12" text-anchor="end"`)
+ }
+ let shade='';if(win.start&&monthNum(win.start)<=hi){const sx=x(Math.max(lo,monthNum(win.start)));shade=`<rect x="${sx.toFixed(2)}" y="${T}" width="${(W-R-sx).toFixed(2)}" height="${ph}" fill="#fdf0ec" opacity=".45"/>`}
+ let paths=`<path d="${pointPath(M.s,x,y)}" fill="none" stroke="${COLORS[k]}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>`;
+ if(M.regAll){paths+=`<path d="M ${x(M.s[0].x).toFixed(2)} ${y(M.regAll.at(M.s[0].x)).toFixed(2)} L ${x(M.s.at(-1).x).toFixed(2)} ${y(M.regAll.at(M.s.at(-1).x)).toFixed(2)}" stroke="#ec7b40" stroke-width="3" stroke-dasharray="10 7" fill="none" stroke-linecap="round"/>`}
+ if(M.regRecent&&M.recent.length>1){const a=M.recent[0],b=M.recent.at(-1);paths+=`<path d="M ${x(a.x).toFixed(2)} ${y(M.regRecent.at(a.x)).toFixed(2)} L ${x(b.x).toFixed(2)} ${y(M.regRecent.at(b.x)).toFixed(2)}" stroke="#c62b29" stroke-width="3.2" stroke-dasharray="8 6" fill="none" stroke-linecap="round"/>`}
+ if(M.last){paths+=`<circle cx="${x(M.last.x).toFixed(2)}" cy="${y(M.last.y).toFixed(2)}" r="5" fill="${COLORS[k]}" stroke="#fff" stroke-width="2"/>`}
+ const periodStart=shortDate(monthKey(lo));const periodEnd=shortDate(monthKey(hi));
+
+ let svg=`<svg class="plot" id="graph-${k}" viewBox="0 0 ${W} ${H}" style="width:100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${LABELS[k]} 월별 해수면 온도 편차 ${periodStart}부터 ${periodEnd}까지. 선택기간 경향성 ${fmt(M.trendFull)} 도/35년, 최근 경향성 ${fmt(M.trendRecent)} 도/10년"><rect x="0" y="0" width="${W}" height="${H}" fill="#fff"/><defs><clipPath id="clip-${k}"><rect x="${L}" y="${T}" width="${pw}" height="${ph}"/></clipPath></defs>${shade}${grid}${ticks}<g clip-path="url(#clip-${k})">${paths}<line id="cross-${k}" x1="0" y1="${T}" x2="0" y2="${T+ph}" stroke="#425b6f" stroke-width="1" stroke-dasharray="4 4" display="none"/><circle id="point-${k}" r="5" fill="#fff" stroke="${COLORS[k]}" stroke-width="2.5" display="none"/></g>${mkLine(L,T,L,T+ph,'stroke="#5f7180" stroke-width="1.2"')}${mkLine(L,T,W-R,T,'stroke="#5f7180" stroke-width="1.2"')}${mkLine(W-R,T,W-R,T+ph,'stroke="#5f7180" stroke-width="1.2"')}${mkLine(L,T+ph,W-R,T+ph,'stroke="#5f7180" stroke-width="1.2"')}${svgText(18,H/2,'해수면 온도 편차 (℃)',`fill="#111111" font-size="12" font-weight="650" transform="rotate(-90 18 ${H/2})" text-anchor="middle"`)}<rect x="${L}" y="${T}" width="${pw}" height="${ph}" fill="transparent" id="overlay-${k}" style="cursor:crosshair"/><text id="region-label-${k}" x="${L+15}" y="${T+30}" text-anchor="start" fill="#111111" font-size="21" font-weight="800" font-family="Malgun Gothic, Noto Sans KR, sans-serif" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" paint-order="stroke" pointer-events="none">${LABELS[k]}</text></svg>`;
+ return {svg,W,H,L,R,T,B,pw,ph,x,y,lo,hi};
+}
+function hookHover(k,model,gr){
+ const overlay=byId(`overlay-${k}`),svg=byId(`graph-${k}`),cross=byId(`cross-${k}`),point=byId(`point-${k}`),tip=byId(`tip-${k}`);
+ const values=new Map(model.s.map(p=>[p.x,p]));
+ const off=()=>{cross.setAttribute('display','none');point.setAttribute('display','none');tip.hidden=true};
+ overlay.addEventListener('pointerleave',off);
+ overlay.addEventListener('pointermove',event=>{
+  const rect=svg.getBoundingClientRect();const px=(event.clientX-rect.left)/rect.width*gr.W;
+  const xval=Math.max(gr.L,Math.min(gr.W-gr.R,px));const ix=Math.round((xval-gr.L)/gr.pw*(gr.hi-gr.lo)+gr.lo);
+  // 일부 해역에 결측이 있을 수 있으므로, 가까운 유효 월을 선택
+  let p=values.get(ix);
+  if(!p){let best=Infinity;for(const cand of model.s){const d=Math.abs(cand.x-ix);if(d<best){best=d;p=cand}}}
+  if(!p)return off();
+  const gx=gr.x(p.x),gy=gr.y(p.y);
+  cross.setAttribute('x1',gx);cross.setAttribute('x2',gx);cross.setAttribute('display','');
+  point.setAttribute('cx',gx);point.setAttribute('cy',gy);point.setAttribute('display','');
+  tip.hidden=false;tip.innerHTML=`<strong>${p.date.replace('-','년 ')}월 · ${LABELS[k]}</strong><div>평년 대비 ${fmt(p.y,1)}℃</div><div style="color:#a9c6d5">해당 월 평년 ${fmtBare(db.normals[k][Number(p.date.slice(5))-1],1)}℃</div>`;
+  const posRect=svg.parentElement.getBoundingClientRect();
+  tip.style.left=`${Math.max(90,Math.min(posRect.width-90,gr.x(p.x)*rect.width/gr.W+(rect.left-posRect.left)))}px`;
+  tip.style.top=`${Math.max(48,gr.y(p.y)*rect.height/gr.H+(rect.top-posRect.top)-10)}px`;
+ });
+}
+function regionCard(k,M,win,range){
+ const lastText=M.last?.date?.replace('-','.')||'—';const gr=buildGraph(k,M,monthNum(range.start),monthNum(range.end),win);
+ const card=document.createElement('article');card.className='region-card';card.style.setProperty('--sea',COLORS[k]);
+ card.innerHTML=`<div class="region-top"><div class="region-name"><span class="region-bullet"></span><h3>${LABELS[k]} <span class="sub">월별 편차 · ${rangeText(range.start,range.end)}</span></h3></div><div class="stat-pairs">
+ <div class="stat"><span class="lbl">${lastText} 평년 대비 편차</span><strong class="${cls(M.lastVsNorm)}">${fmt(M.lastVsNorm,1)}℃</strong></div>
+ <div class="stat"><span class="lbl">${lastText} 최근 10년 동월평균 대비</span><strong class="${cls(M.lastVsDecade)}">${fmt(M.lastVsDecade,2)}℃</strong><span class="small">동월 ${M.monthsSame}개 자료</span></div>
+ </div></div>
+ <div class="plot-wrap"><div class="plot-stack" id="stack-${k}" style="width:${settings.chartWidthPct}%">${gr.svg}<div class="legend-strip" aria-label="${LABELS[k]} 통계 범례">
+  <div class="legend-metric ref"><span class="legend-label">평년 평균:</span><strong class="legend-value">${fmt(M.meanBaseline,2)}℃</strong></div>
+  <div class="legend-metric decade"><span class="legend-label">최근 10년 평균:</span><strong class="legend-value">${fmt(M.meanRecent,2)}℃</strong></div>
+  <div class="legend-metric full"><span class="legend-label">전체 기간 경향:</span><strong class="legend-value">${fmt(M.trendFull,2)}℃/35년</strong></div>
+  <div class="legend-metric recent"><span class="legend-label">최근 10년 경향:</span><strong class="legend-value">${fmt(M.trendRecent,2)}℃/10년</strong></div>
+ </div></div><div id="tip-${k}" class="hover-tip" hidden></div></div>
+ <div class="region-foot"><div class="breakdown"><span>선택기간 평균 편차 <strong>${fmt(M.meanFull,2)}℃</strong></span><span>자료 <strong>${M.s.length}개월</strong></span></div><div class="plot-actions"><button type="button" class="textbtn" id="png-${k}">그래프+통계 PNG 저장 ↓</button></div></div>`;
+ byId('charts').appendChild(card);hookHover(k,M,gr);
+ byId(`png-${k}`).addEventListener('click',()=>downloadPng(k));
+}
+function saveSettings(){
+ settings.savedAt=Date.now();
+ try{localStorage.setItem(SETTINGS_STORAGE,JSON.stringify(settings))}catch(e){}
+}
+function syncRangeControls(){
+ byId('rangeStart').value=settings.start;
+ byId('rangeEnd').value=settings.end;
+ byId('followLatest').checked=!!settings.followLatest;
+ byId('recentMode').value=settings.recentMode==='120'?'120':'same';
+ const first=earliest(),last=latest();
+ for(const id of ['rangeStart','rangeEnd']){byId(id).min=first;byId(id).max=last}
+}
+function normalizeRange(){
+ const first=earliest(),last=latest();
+ if(!first||!last)return false;
+ if(!isMonth(settings.start)||settings.start<first||settings.start>last)settings.start=first;
+ if(settings.followLatest)settings.end=last;
+ else if(!isMonth(settings.end)||settings.end<first||settings.end>last)settings.end=last;
+ if(settings.end<settings.start)settings.start=settings.end;
+ if(settings.recentMode!=='120')settings.recentMode='same';
+ syncRangeControls();return true;
+}
+function draw(){
+ if(!normalizeRange())return;
+ syncChartSizeControls();
+ const first=earliest(),last=latest();
+ const range={start:settings.start,end:settings.end};
+ const win=datesInWindow(range.end,range.start);
+ byId('dataRange').textContent=rangeText(first,last);
+ byId('chosenRange').textContent=rangeText(range.start,range.end);
+ byId('recentRange').textContent=rangeText(win.start,win.end);
+ byId('countDisplay').textContent=IDS.map(k=>db.regions[k]&&Object.keys(db.regions[k]).length).join(' / ')+'개월';
+ byId('updateLabel').textContent=`선택기간 ${shortDate(range.start)}–${shortDate(range.end)} · 회귀계수 재계산`;
+ const isSame=settings.recentMode==='same';
+ const theoreticalLen=isSame?109:120;
+ const observedLen=monthNum(win.end)-monthNum(win.start)+1;
+ const full10=isSame?`동일 월 기준 총 ${theoreticalLen}개월`:`정확히 ${theoreticalLen}개월`;
+ const explanation=win.isPartial?`선택기간이 최근 10년 기준보다 짧아 ${observedLen}개월만 사용합니다. 최근기간 경향성은 10년으로 환산한 값이며, 선택기간 밖의 과거 자료는 사용하지 않습니다.`:`최근기간은 ${shortDate(win.start)}~${shortDate(win.end)} (${full10})입니다.`;
+ byId('rangeCaution').textContent=explanation+(isSame?' 참고: 동일 월 기준 10개 연도 전 같은 달부터는 양 끝을 포함하면 109개월입니다.':'');
+ byId('rangeStatus').textContent=`적용된 분석기간: ${rangeText(range.start,range.end)} · ${monthNum(range.end)-monthNum(range.start)+1}개월 · ${settings.followLatest?'새 월자료 입력 시 종료 월 자동 갱신':'종료 월 수동 고정'}`;
+ byId('rangeStatus').className='range-hint '+(win.isPartial?'range-warning':'range-applied');
+ byId('charts').replaceChildren();
+ for(const k of IDS)regionCard(k,metrics(k,range,win),win,range);
+ refreshHistory();
+}
+function normalizeChartSize(){
+ const clamp=(v,min,max)=>Math.min(max,Math.max(min,Math.round(Number(v)/5)*5));
+ settings.chartWidthPct=Number.isFinite(Number(settings.chartWidthPct))?clamp(settings.chartWidthPct,70,170):100;
+ settings.chartHeightPct=Number.isFinite(Number(settings.chartHeightPct))?clamp(settings.chartHeightPct,70,230):100;
+}
+function syncChartSizeControls(){
+ normalizeChartSize();
+ byId('chartWidthPct').value=settings.chartWidthPct;
+ byId('chartHeightPct').value=settings.chartHeightPct;
+ byId('chartWidthOut').textContent=`${settings.chartWidthPct}%`;
+ byId('chartHeightOut').textContent=`${settings.chartHeightPct}%`;
+ byId('aspectReadout').textContent=`가로:세로 ${(1140*settings.chartWidthPct/(292*settings.chartHeightPct)).toFixed(2)}:1`;
+}
+let renderSizeFrame=0;
+function requestSizeDraw(){
+ if(renderSizeFrame)cancelAnimationFrame(renderSizeFrame);
+ renderSizeFrame=requestAnimationFrame(()=>{renderSizeFrame=0;draw()});
+}
+for(const [id,key] of [['chartWidthPct','chartWidthPct'],['chartHeightPct','chartHeightPct']]){
+ byId(id).addEventListener('input',()=>{
+  settings[key]=Number(byId(id).value);
+  syncChartSizeControls();
+  requestSizeDraw();
+ });
+ byId(id).addEventListener('change',()=>{saveSettings();requestSizeDraw()});
+}
+byId('resetChartSize').addEventListener('click',()=>{
+ settings.chartWidthPct=100;settings.chartHeightPct=100;
+ syncChartSizeControls();saveSettings();draw();notify('그래프 비율을 기본값으로 복원했습니다.');
+});
+byId('rangeEnd').addEventListener('change',()=>{
+ byId('followLatest').checked=false;
+});
+byId('rangeForm').addEventListener('submit',event=>{
+ event.preventDefault();
+ const start=byId('rangeStart').value,end=byId('rangeEnd').value,first=earliest(),last=latest();
+ if(!isMonth(start)||!isMonth(end)){notify('시작 및 종료 연월을 모두 지정하세요.');return}
+ if(start>end){notify('시작 연월은 종료 연월보다 앞서야 합니다.');return}
+ if(start<first||end>last){notify(`현재 자료 범위(${rangeText(first,last)}) 안에서 연월을 지정하세요.`);return}
+ settings.start=start;settings.end=end;
+ settings.followLatest=byId('followLatest').checked;
+ // 직접 종료 월을 지정했으면 자동 모드에서 제외
+ if(end!==last)settings.followLatest=false;
+ saveSettings();draw();notify(`분석기간을 ${rangeText(start,end)}로 변경했습니다.`);
+});
+byId('followLatest').addEventListener('change',()=>{
+ settings.followLatest=byId('followLatest').checked;
+ if(settings.followLatest){settings.end=latest();byId('rangeEnd').value=settings.end}
+ else {settings.end=byId('rangeEnd').value}
+ saveSettings();draw();notify(settings.followLatest?'새 월자료 입력 시 종료 월 자동 갱신':'종료 월을 수동으로 설정합니다.');
+});
+byId('fullRangeBtn').addEventListener('click',()=>{
+ settings.start=earliest();settings.end=latest();settings.followLatest=true;
+ saveSettings();draw();notify('전체 자료 기간으로 복원했습니다.');
+});
+function prefill(){const month=byId('monthInput').value;for(const k of IDS){const inp=byId(`${k}Value`);const v=db.regions[k][month];inp.value=Number.isFinite(v)?String(v):''}}
+function nextMonth(){const l=latest();return l?monthKey(monthNum(l)+1):'2026-12'}
+function saveDB(){db.savedAt=Date.now();try{localStorage.setItem(STORAGE,JSON.stringify(db));return true}catch(e){return false}}
+byId('monthInput').value=nextMonth();byId('monthInput').addEventListener('change',prefill);
+byId('entryForm').addEventListener('submit',event=>{
+ event.preventDefault();const date=byId('monthInput').value;if(!isMonth(date)){notify('올바른 연월을 선택하세요.');return}
+ let count=0;for(const k of IDS){const inp=byId(`${k}Value`),s=inp.value.trim();if(!s)continue;const v=Number(s);if(!Number.isFinite(v)||v<-20||v>20){notify(`${LABELS[k]} 편차 값은 -20~20℃ 범위의 숫자로 입력하세요.`);return}count++}
+ if(!count){notify('수정할 해역의 편차를 하나 이상 입력하세요.');return}
+ for(const k of IDS){const str=byId(`${k}Value`).value.trim();if(str)db.regions[k][date]=Number(str)}
+ const persisted=saveDB();draw();saveSettings();notify(`${date.replace('-','년 ')}월 자료 ${count}개 해역 반영 완료${persisted?'':' · 보관하려면 HTML 저장을 이용하세요.'}`);
+ byId('monthInput').value=nextMonth();prefill();
+});
+byId('recentMode').addEventListener('change',()=>{settings.recentMode=byId('recentMode').value;saveSettings();draw()});
+function refreshHistory(){const last=latest(),out=[];if(!last)return;for(let t=monthNum(last);t>monthNum(last)-12;t--){const d=monthKey(t),values=IDS.map(k=>db.regions[k][d]);out.push(`<tr data-month="${d}"><td>${d.replace('-','.')}</td>${values.map(v=>`<td>${Number.isFinite(v)?fmt(v,1)+'℃':'—'}</td>`).join('')}</tr>`)}
+ byId('dataTable').innerHTML=out.join('');for(const tr of byId('dataTable').querySelectorAll('tr'))tr.addEventListener('click',()=>{byId('monthInput').value=tr.dataset.month;prefill();byId('monthInput').scrollIntoView({behavior:'smooth',block:'center'});notify(`${tr.dataset.month} 자료를 불러왔습니다.`)});
+}
+function download(filename,mime,textOrBlob){const blob=textOrBlob instanceof Blob?textOrBlob:new Blob([textOrBlob],{type:mime});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000)}
+function exportCSV(){const dates=allKeys();const lines=['연월,서해_편차_C,남해_편차_C,동해_편차_C'];for(const dt of dates)lines.push([dt,...IDS.map(k=>db.regions[k][dt]??'')].join(','));download('해수면온도_월별편차_3해역.csv','text/csv;charset=utf-8','\uFEFF'+lines.join('\r\n'))}
+byId('csvBtn').addEventListener('click',exportCSV);
+byId('jsonBtn').addEventListener('click',()=>download('해수면온도_편차_데이터백업.json','application/json;charset=utf-8',JSON.stringify(db,null,2)));
+byId('jsonImportBtn').addEventListener('click',()=>byId('jsonFile').click());
+byId('jsonFile').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{const fresh=JSON.parse(await file.text());if(!isValidDB(fresh))throw Error('유효한 해역 자료가 없습니다.');
+ for(const k of IDS){for(const [date,v] of Object.entries(fresh.regions[k]))if(!isMonth(date)||!Number.isFinite(v))throw Error('데이터 내 날짜 또는 값이 올바르지 않습니다.')}
+ if(!confirm('현재 그래프 데이터를 백업 JSON으로 교체하시겠습니까?'))return;db=clone(fresh);saveDB();draw();byId('monthInput').value=nextMonth();prefill();notify('JSON 자료를 성공적으로 복원했습니다.')}catch(err){notify(`복원 실패: ${err.message}`)}finally{byId('jsonFile').value=''}});
+byId('htmlBtn').addEventListener('click',()=>{
+ const payload=clone(db);payload.savedAt=Date.now();db.savedAt=payload.savedAt;
+ byId('embedded-data').textContent=JSON.stringify(payload).replace(/</g,'\\u003c');
+ settings.savedAt=Date.now();byId('embedded-settings').textContent=JSON.stringify(settings).replace(/</g,'\\u003c');
+ saveSettings();saveDB();
+ const html='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
+ download('해수면온도_월별편차_업데이트포함.html','text/html;charset=utf-8',html);
+ notify('현재 편차 데이터가 내장된 HTML 파일을 저장했습니다.');
+});
+byId('resetBtn').addEventListener('click',()=>{if(!confirm('업로드한 원본 엑셀 값으로 모두 복원하시겠습니까? 입력해 수정한 내용은 사라집니다.'))return;db=clone(original);db.savedAt=Date.now();saveDB();normalizeRange();draw();saveSettings();byId('monthInput').value=nextMonth();prefill();notify('원본 엑셀 값으로 복원했습니다.')});
+function downloadPng(k){
+ const source=byId(`graph-${k}`),svg=source.cloneNode(true);
+ // 다운로드용 SVG에서는 호버 표식과 마지막 값 강조 동그라미를 모두 제외합니다.
+ for(const id of [`overlay-${k}`,`cross-${k}`,`point-${k}`])svg.querySelector(`#${id}`)?.remove();
+ svg.querySelectorAll('circle').forEach(node=>node.remove());
+ const vb=source.viewBox.baseVal,W=vb.width,H=vb.height;
+ svg.removeAttribute('style');
+ svg.setAttribute('width',W);
+ svg.setAttribute('height',H);
+ svg.style.background='#ffffff';
+ const xml=new XMLSerializer().serializeToString(svg);
+ const src=URL.createObjectURL(new Blob([xml],{type:'image/svg+xml;charset=utf-8'}));
+ const image=new Image();
+ image.onload=()=>{
+  const range={start:settings.start,end:settings.end},win=datesInWindow(range.end,range.start),M=metrics(k,range,win);
+  const scale=2,legendH=59,padX=16,padTop=2;
+  const can=document.createElement('canvas');
+  can.width=W*scale;
+  can.height=(H+legendH+padTop)*scale;
+  const ctx=can.getContext('2d');
+  ctx.scale(scale,scale);
+  ctx.fillStyle='#fff';
+  ctx.fillRect(0,0,W,H+legendH+padTop);
+  ctx.drawImage(image,0,0,W,H);
+  const y0=H+padTop;
+  ctx.fillStyle='#f8fbfd';
+  ctx.strokeStyle='#e2ebf0';
+  ctx.lineWidth=1;
+  const boxW=W-padX*2, boxH=legendH-5;
+  const radius=9;
+  ctx.beginPath();
+  ctx.moveTo(padX+radius,y0);
+  ctx.lineTo(padX+boxW-radius,y0);
+  ctx.quadraticCurveTo(padX+boxW,y0,padX+boxW,y0+radius);
+  ctx.lineTo(padX+boxW,y0+boxH-radius);
+  ctx.quadraticCurveTo(padX+boxW,y0+boxH,padX+boxW-radius,y0+boxH);
+  ctx.lineTo(padX+radius,y0+boxH);
+  ctx.quadraticCurveTo(padX,y0+boxH,padX,y0+boxH-radius);
+  ctx.lineTo(padX,y0+radius);
+  ctx.quadraticCurveTo(padX,y0,padX+radius,y0);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+  const items=[
+   ['평년 평균:',`${fmt(M.meanBaseline,2)}℃`,'#a3b2bd','#111111'],
+   ['최근 10년 평균:',`${fmt(M.meanRecent,2)}℃`,'#1275a8','#111111'],
+   ['전체 기간 경향:',`${fmt(M.trendFull,2)}℃/35년`,'#e87c43','#c86a32'],
+   ['최근 10년 경향:',`${fmt(M.trendRecent,2)}℃/10년`,'#c62b29','#b12c2e']
+  ];
+  const col=(boxW-18)/4;
+  items.forEach(([label,value,bar,valueColor],i)=>{
+   const x=padX+12+i*col;
+   ctx.fillStyle='#111111';
+   ctx.font='700 11px "Malgun Gothic", sans-serif';
+   ctx.fillText(label,x,y0+18,col-18);
+   ctx.fillStyle=valueColor;
+   ctx.font='800 17px "Malgun Gothic", sans-serif';
+   ctx.fillText(value,x,y0+39,col-18);
+  });
+  URL.revokeObjectURL(src);
+  can.toBlob(b=>{if(b)download(`해수면온도_월편차_${LABELS[k]}_그래프통계.png`,'image/png',b);else notify('PNG 변환에 실패했습니다.')},'image/png');
+ };
+ image.onerror=()=>{URL.revokeObjectURL(src);notify('이미지 내보내기에 실패했습니다.')};
+ image.src=src;
+}
+normalizeRange();
+draw();
+})();
+</script>
+</body>
+</html>
