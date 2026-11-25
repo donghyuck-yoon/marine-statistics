@@ -381,7 +381,8 @@ function summary(series,year,settings){
  let ranked=base.map(x=>({...x,rankValue:round1(x.value)})).sort((a,b)=>b.rankValue-a.rankValue||a.year-b.year);
  let inRange=year>=settings.refStart&&year<=settings.refEnd;
  let rank=inRange&&target?1+ranked.filter(x=>x.rankValue>round1(target.value)+1e-9).length:null;
- return {target,prev,baseline:mean(base.map(x=>x.value)),rank,nbase:ranked.length,highest:ranked[0]||null,lowest:ranked[ranked.length-1]||null,points:series,inRange};
+ let tieYears=inRange&&target?ranked.filter(x=>x.year!==year&&x.rankValue===round1(target.value)).map(x=>x.year).sort((a,b)=>a-b):[];
+ return {target,prev,baseline:mean(base.map(x=>x.value)),rank,tieYears,nbase:ranked.length,highest:ranked[0]||null,lowest:ranked[ranked.length-1]||null,points:series,inRange};
 }
 function getSettings(){
  const period=$('period').value, custom=$('customMonths').value;
@@ -487,7 +488,7 @@ function refresh(){
     return {name:name.replace(/^지점:/,''),seriesKey:name,t,p,base,
       delta:Number.isFinite(t)&&Number.isFinite(p)?t-p:NaN,
       anomaly:Number.isFinite(t)&&Number.isFinite(base)?t-base:NaN,
-      rank:rankOk?s.rank:null,rankFlag:s.inRange?((expected!==0&&s.nbase<expected)?'자료 부족':''):'대상 연도 제외',
+      rank:rankOk?s.rank:null,tieYears:rankOk?(s.tieYears||[]):[],rankFlag:s.inRange?((expected!==0&&s.nbase<expected)?'자료 부족':''):'대상 연도 제외',
       nbase:s.nbase||0,n:s.target?.n||0,days:s.target?.validDays??0,high:s.highest,low:s.lowest};
  });
  let keyAll=regionReady?(allSeries['전해역']||{}):{};
@@ -496,13 +497,20 @@ function refresh(){
  $('subtitle').textContent=settings.source==='marine'?`${settings.variable==='sst'?'해수면 온도':'평균 유의파고'} · ${extraSelected.length?'확장 분석':'기준 17개 분석'} · 선택 ${chosen.size}/${catalog.length}개 지점 · 포함된 ${settings.activeRegions.length}개 해역 동일가중 · 비교 ${settings.refStart}~${settings.refEnd}년`:`${settings.variable==='sst'?'해수면 온도':'평균 유의파고'} · 선택 ${chosen.size}/${catalog.length}개 지점 · ${settings.year-1}년 대비 ${settings.year}년 · 잠정 해역분류 · 10년 순위 미적용`;
  $('kval').textContent=fmt(tAll);$('kunits').textContent=settings.variable==='sst'?'℃':'m';
  $('kprev').textContent=Number.isFinite(tAll)&&Number.isFinite(pAll)?signed(tAll-pAll):'—';
- $('krank').textContent=settings.source==='coastal'?'미적용':!keyAll.inRange?'대상 연도 제외':(expected>0&&keyAll.nbase<expected)?'자료 부족':keyAll.rank?keyAll.rank+'위':'—';
+ $('krank').textContent=settings.source==='coastal'?'미적용':!keyAll.inRange?'대상 연도 제외':(expected>0&&keyAll.nbase<expected)?'자료 부족':keyAll.rank?(keyAll.tieYears?.length?'공동 ':'')+keyAll.rank+'위':'—';
  $('krange').textContent=settings.source==='marine'?`비교 ${settings.refStart}~${settings.refEnd} · 유효 ${keyAll.nbase||0}개년`:'연안·파고부이: 동일 지점·월 전년 비교';
  $('ksites').textContent=new Set(now.map(x=>x.stationKey)).size;
  $('kmeta').textContent=`지점 선택 ${chosen.size}/${catalog.length}개 · 실제 해당 연도/월 유효값 보유 지점`;
  $('tableSlot').innerHTML=yrows.length?(settings.source==='coastal'?
    makeTable(['해역 / 지점',settings.year+'년',(settings.year-1)+'년','전년 차이','공통 유효 지점',settings.year+'년 유효일수'],yrows.map(r=>[r.name,fmt(r.t),fmt(r.p),signed(r.delta),String(r.n),r.seriesKey.startsWith('지점:')?String(r.days):'—'])):
-   makeTable(['해역 / 지점',settings.year+'년',(settings.year-1)+'년','전년차','비교기간 평균','평균 대비','순위','최고연도','최저연도','유효지점'],yrows.map(r=>[r.name,fmt(r.t),fmt(r.p),signed(r.delta),fmt(r.base),signed(r.anomaly),r.rank?`${r.rank}위 / ${r.nbase}년`:(r.rankFlag||'—'),r.high?`${r.high.year} (${fmt(r.high.value)})`:'—',r.low?`${r.low.year} (${fmt(r.low.value)})`:'—',String(r.n)]))):'<div class="empty">해당 조건에 대해 유효자료가 없습니다.</div>';
+   makeTable(['해역 / 지점',settings.year+'년',(settings.year-1)+'년','전년차','비교기간 평균','평균 대비','순위','최고연도','최저연도','유효지점'],yrows.map(r=>[r.name,fmt(r.t),fmt(r.p),signed(r.delta),fmt(r.base),signed(r.anomaly),r.rank?`${r.tieYears.length?'공동 ':''}${r.rank}위 / ${r.nbase}년${r.tieYears.length?' *':''}`:(r.rankFlag||'—'),r.high?`${r.high.year} (${fmt(r.high.value)})`:'—',r.low?`${r.low.year} (${fmt(r.low.value)})`:'—',String(r.n)]))):'<div class="empty">해당 조건에 대해 유효자료가 없습니다.</div>';
+ if(settings.source==='marine'){
+   const tied=yrows.filter(r=>r.rank&&r.tieYears.length);
+   if(tied.length){
+     const notes=tied.map(r=>`<div>※ ${esc(r.name)}: ${esc(r.tieYears.map(y=>y+'년').join('·'))}과 공동 ${r.rank}위</div>`).join('');
+     $('tableSlot').innerHTML+=`<div class="caption method-note" style="margin-top:8px">* 공동순위(소수 첫째 자리 기준)<div style="margin-top:4px">${notes}</div></div>`;
+   }
+ }
  let plotKey=settings.region==='stations'?yrows.find(x=>Number.isFinite(x.t))?.seriesKey:(settings.region==='all'?'전해역':settings.region);
 
  $('chartLabel').textContent=plotKey?plotKey.replace(/^지점:/,''):'—';
