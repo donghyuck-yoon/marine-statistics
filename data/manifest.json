@@ -6,10 +6,10 @@
   "description": "Official KMA data portal daily CSV; manually uploaded, automatically validated and merged",
   "summary": {
     "marine": {
-      "records": 95647,
-      "stations_with_history": 49,
+      "records": 96083,
+      "stations_with_history": 52,
       "first_observation": "2016-01-01",
-      "last_observation": "2026-11-16"
+      "last_observation": "2026-11-26"
     },
     "coastal": {
       "records": 213689,
@@ -203,15 +203,15 @@
       "source": "marine",
       "year": 2026,
       "path": "data/marine/2026.csv",
-      "rows": 13455,
-      "last_observation": "2026-11-16",
-      "bytes": 291853,
-      "sha256": "6a00ff16e7cb59d144cd38562882fdec1685185a62c1465e3dfa1a5f1b841171"
+      "rows": 13891,
+      "last_observation": "2026-11-26",
+      "bytes": 301225,
+      "sha256": "e590c126e3b81f49a1744595f2755b61d9058abf148d8337bd19f85972351a06"
     }
   ],
   "update_mode": "semi-automatic-official-portal-csv",
-  "last_portal_import_at_kst": "2026-11-17T07:51:07+09:00",
+  "last_portal_import_at_kst": "2026-11-27T09:38:56+09:00",
   "last_portal_import_files": [
-    "OBS_BUOY_DD_20261117074340.csv"
+    "OBS_BUOY_DD_20261127093609.csv"
   ]
 }
